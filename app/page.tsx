@@ -89,7 +89,7 @@ export default function Home() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-4 py-12"
-      style={{ background: "linear-gradient(135deg, #c084fc 0%, #f472b6 50%, #fb923c 100%)" }}
+      style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 40%, #eab308 100%)" }}
     >
       {stage === "start" && (
         <div className="w-full max-w-lg mx-auto text-center">
@@ -115,7 +115,7 @@ export default function Home() {
             <button
               onClick={() => setStage("quiz")}
               className="w-full py-4 rounded-2xl text-white font-bold text-lg transition-opacity hover:opacity-90 cursor-pointer"
-              style={{ background: "linear-gradient(to right, #c084fc, #f472b6, #fb923c)" }}
+              style={{ background: "linear-gradient(to right, #7c3aed, #a855f7, #eab308)" }}
             >
               퀴즈 시작하기 →
             </button>

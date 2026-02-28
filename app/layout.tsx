@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "나의 커피 성격은? | Basecamp Coffee",
-  description: "6개의 질문으로 당신에게 딱 맞는 커피 성격을 알아보세요. Basecamp Coffee 커피 성격 퀴즈.",
+  title: "미녶 독자 유형은? | @minyeahp_",
+  description: "5개의 질문으로 알아보는 나의 미녶 독자 유형! @minyeahp_",
 };
 
 export default function RootLayout({

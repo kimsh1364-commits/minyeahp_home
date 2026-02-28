@@ -55,7 +55,7 @@ export default function QuizResult({ type, onRestart }: Props) {
         {/* Emoji Header */}
         <div
           className="flex items-center justify-center py-12"
-          style={{ background: "linear-gradient(135deg, #c084fc 0%, #f472b6 50%, #fb923c 100%)" }}
+          style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 40%, #eab308 100%)" }}
         >
           <span className="text-8xl">{result.emoji}</span>
         </div>
@@ -93,7 +93,7 @@ export default function QuizResult({ type, onRestart }: Props) {
           <button
             onClick={onRestart}
             className="w-full py-4 rounded-2xl text-white font-bold text-lg transition-opacity hover:opacity-90 cursor-pointer"
-            style={{ background: "linear-gradient(to right, #c084fc, #f472b6, #fb923c)" }}
+            style={{ background: "linear-gradient(to right, #7c3aed, #a855f7, #eab308)" }}
           >
             다시 하기 🔄
           </button>
