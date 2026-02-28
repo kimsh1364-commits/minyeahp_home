@@ -6,57 +6,48 @@ import QuizResult from "./components/QuizResult";
 
 const questions: Question[] = [
   {
-    question: "카페에서 줄 서다 처음 보는 메뉴를 발견했다. 당신은?",
+    question: "미녶 계정을 처음 발견한 계기는?",
     answers: [
-      { emoji: "🤩", text: "바로 주문, 일단 먹어보고 판단", type: "대담한 모험가" },
-      { emoji: "😊", text: "바리스타에게 맛이 어떤지 물어보기", type: "달콤한 열정가" },
-      { emoji: "🌿", text: "재료 확인하고 건강한 것으로", type: "건강 덕후" },
-      { emoji: "☕", text: "늘 마시던 걸로, 역시 믿을 건 단골 메뉴", type: "실용주의자" },
+      { emoji: "🔍", text: "나도 비슷한 증상이 있어서 검색하다가", type: "동지형" },
+      { emoji: "💛", text: "친구/가족이 이런 증상이 있어서 이해하고 싶었어", type: "이해하고 싶은 형" },
+      { emoji: "📱", text: "그냥 알고리즘에 떴는데 계속 보게 됐어", type: "조용한 공감러" },
+      { emoji: "🌸", text: "미녶 팬이라 처음부터 쭉 봐왔어", type: "응원단형" },
     ],
   },
   {
-    question: "넷플릭스 마라톤을 한다면?",
+    question: "미녶 툰을 보다가 가장 많이 드는 생각은?",
     answers: [
-      { emoji: "⚔️", text: "긴장감 넘치는 액션 시리즈", type: "대담한 모험가" },
-      { emoji: "🌸", text: "따뜻한 로맨틱 코미디", type: "달콤한 열정가" },
-      { emoji: "🧘", text: "잔잔한 자연 다큐멘터리", type: "건강 덕후" },
-      { emoji: "🎯", text: "일단 뭐든 틀고 딴짓하기", type: "실용주의자" },
+      { emoji: "😶", text: "\"이거 내 얘기잖아...\"", type: "동지형" },
+      { emoji: "💭", text: "\"아, 이런 기분이구나. 이제 좀 이해될 것 같아\"", type: "이해하고 싶은 형" },
+      { emoji: "🥲", text: "\"왜인지 모르게 울컥해\"", type: "조용한 공감러" },
+      { emoji: "🥺", text: "\"미녶 오늘도 수고했다\"", type: "응원단형" },
     ],
   },
   {
-    question: "이번 주말 계획은?",
+    question: "힘든 날, 나는?",
     answers: [
-      { emoji: "🏔️", text: "즉흥 등산 또는 새로운 액티비티", type: "대담한 모험가" },
-      { emoji: "🛁", text: "집에서 홈카페 & 달콤한 디저트", type: "달콤한 열정가" },
-      { emoji: "🧗", text: "요가 또는 러닝", type: "건강 덕후" },
-      { emoji: "🛋️", text: "밀린 할 일 처리", type: "실용주의자" },
+      { emoji: "🫙", text: "혼자 조용히 버팀. 설명하기가 너무 힘들어", type: "동지형" },
+      { emoji: "🤲", text: "힘든 사람 곁에 있어주고 싶어서 뭘 할 수 있는지 찾아봄", type: "이해하고 싶은 형" },
+      { emoji: "🎧", text: "뭔가 공감되는 콘텐츠 찾아보며 위로받음", type: "조용한 공감러" },
+      { emoji: "🌟", text: "좋아하는 사람/콘텐츠 보면서 기운 차림", type: "응원단형" },
     ],
   },
   {
-    question: "마블 어벤져스 중 나와 가장 비슷한 캐릭터는?",
+    question: "공황장애나 폐쇄공포증이라는 단어를 들으면?",
     answers: [
-      { emoji: "🦸", text: "아이언맨 (혁신적, 강렬)", type: "대담한 모험가" },
-      { emoji: "🌟", text: "스파이더맨 (따뜻하고 유쾌)", type: "달콤한 열정가" },
-      { emoji: "🌿", text: "블랙 위도우 (건강하고 자기관리 철저)", type: "건강 덕후" },
-      { emoji: "🛡️", text: "캡틴 아메리카 (실용적, 책임감)", type: "실용주의자" },
+      { emoji: "💓", text: "심장이 쿵함. 나의 일상이니까", type: "동지형" },
+      { emoji: "👤", text: "내 소중한 사람 얼굴이 떠오름", type: "이해하고 싶은 형" },
+      { emoji: "🤔", text: "뭔가 아는 것 같기도 하고... 더 알고 싶어짐", type: "조용한 공감러" },
+      { emoji: "😄", text: "미녶이 생각남", type: "응원단형" },
     ],
   },
   {
-    question: "여행 스타일은?",
+    question: "미녶 툰의 한 컷을 저장한다면?",
     answers: [
-      { emoji: "🌋", text: "무계획 배낭여행, 즉흥적으로", type: "대담한 모험가" },
-      { emoji: "🏖️", text: "리조트에서 여유롭게, 맛집 투어", type: "달콤한 열정가" },
-      { emoji: "🚴", text: "자전거 여행 또는 하이킹 코스", type: "건강 덕후" },
-      { emoji: "📋", text: "꼼꼼하게 계획 세우고 효율적으로", type: "실용주의자" },
-    ],
-  },
-  {
-    question: "아침에 일어나서 제일 먼저 하는 것은?",
-    answers: [
-      { emoji: "🏃", text: "바로 운동 또는 찬물 샤워", type: "대담한 모험가" },
-      { emoji: "😴", text: "스누즈 한 번 더, 천천히 일어나기", type: "달콤한 열정가" },
-      { emoji: "🧘", text: "스트레칭 또는 명상", type: "건강 덕후" },
-      { emoji: "📱", text: "오늘 할 일 체크하기", type: "실용주의자" },
+      { emoji: "🖤", text: "내가 말로 못 했던 감정이 담긴 컷", type: "동지형" },
+      { emoji: "📤", text: "주변 사람에게 보여주고 싶은 컷", type: "이해하고 싶은 형" },
+      { emoji: "💾", text: "왠지 모르게 마음에 걸리는 컷", type: "조용한 공감러" },
+      { emoji: "🤣", text: "미녶이 특히 귀엽거나 웃긴 컷", type: "응원단형" },
     ],
   },
 ];
@@ -65,10 +56,10 @@ type Stage = "start" | "quiz" | "result";
 
 function getTopType(answers: PersonalityType[]): PersonalityType {
   const counts: Record<PersonalityType, number> = {
-    "대담한 모험가": 0,
-    "달콤한 열정가": 0,
-    "건강 덕후": 0,
-    "실용주의자": 0,
+    "동지형": 0,
+    "이해하고 싶은 형": 0,
+    "조용한 공감러": 0,
+    "응원단형": 0,
   };
   for (const a of answers) counts[a]++;
   return (Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]) as PersonalityType;
@@ -98,25 +89,25 @@ export default function Home() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-4 py-12"
-      style={{ background: "linear-gradient(135deg, #f472b6 0%, #facc15 50%, #2dd4bf 100%)" }}
+      style={{ background: "linear-gradient(135deg, #c084fc 0%, #f472b6 50%, #fb923c 100%)" }}
     >
       {stage === "start" && (
         <div className="w-full max-w-lg mx-auto text-center">
           <div className="bg-white rounded-3xl shadow-xl p-10">
-            <div className="text-6xl mb-4">☕</div>
+            <div className="text-6xl mb-4">🫶</div>
             <h1 className="text-3xl font-bold text-gray-800 mb-3">
-              나의 커피 성격은?
+              나는 어떤 미녶 독자일까?
             </h1>
             <p className="text-gray-500 mb-2 text-lg">
-              Basecamp Coffee
+              @minyeahp_
             </p>
             <p className="text-gray-600 mb-8 leading-relaxed">
-              6개의 질문으로 당신에게 딱 맞는<br />
-              커피 성격을 알아보세요!
+              5개의 질문으로 알아보는<br />
+              나의 미녶 독자 유형!
             </p>
             <div className="flex gap-2 justify-center flex-wrap mb-8">
-              {["대담한 모험가", "달콤한 열정가", "건강 덕후", "실용주의자"].map((t) => (
-                <span key={t} className="bg-pink-50 text-pink-600 text-sm px-3 py-1 rounded-full font-medium">
+              {["동지형", "이해하고 싶은 형", "조용한 공감러", "응원단형"].map((t) => (
+                <span key={t} className="bg-purple-50 text-purple-600 text-sm px-3 py-1 rounded-full font-medium">
                   {t}
                 </span>
               ))}
@@ -124,7 +115,7 @@ export default function Home() {
             <button
               onClick={() => setStage("quiz")}
               className="w-full py-4 rounded-2xl text-white font-bold text-lg transition-opacity hover:opacity-90 cursor-pointer"
-              style={{ background: "linear-gradient(to right, #f472b6, #facc15, #2dd4bf)" }}
+              style={{ background: "linear-gradient(to right, #c084fc, #f472b6, #fb923c)" }}
             >
               퀴즈 시작하기 →
             </button>

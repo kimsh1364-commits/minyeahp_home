@@ -1,6 +1,6 @@
 "use client";
 
-type PersonalityType = "대담한 모험가" | "달콤한 열정가" | "건강 덕후" | "실용주의자";
+type PersonalityType = "동지형" | "이해하고 싶은 형" | "조용한 공감러" | "응원단형";
 
 type Answer = {
   emoji: string;
