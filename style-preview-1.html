@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스타일 1 - 발랄하고 컬러풀</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+    background: linear-gradient(135deg, #FF6B6B, #FFE66D, #4ECDC4);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: white;
+    border-radius: 30px;
+    padding: 40px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    text-align: center;
+  }
+  .emoji { font-size: 60px; margin-bottom: 15px; }
+  .label {
+    background: #FF6B6B;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 5px 15px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+  }
+  h1 { font-size: 24px; color: #333; margin-bottom: 10px; }
+  .subtitle { color: #999; font-size: 14px; margin-bottom: 30px; }
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .option {
+    background: #f8f8f8;
+    border: 3px solid transparent;
+    border-radius: 15px;
+    padding: 15px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .option:hover { border-color: #FF6B6B; background: #fff5f5; transform: scale(1.02); }
+  .option-emoji { font-size: 24px; }
+  .progress {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 25px;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #ddd; }
+  .dot.active { background: #FF6B6B; }
+  .style-tag {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="style-tag">🎨 스타일 1: 발랄하고 컬러풀</div>
+<div class="card">
+  <div class="emoji">🎬</div>
+  <div class="label">질문 3 / 6</div>
+  <div class="progress">
+    <div class="dot active"></div>
+    <div class="dot active"></div>
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+  <h1>넷플릭스 마라톤을 한다면?</h1>
+  <p class="subtitle">주말 저녁, 당신의 선택은?</p>
+  <div class="options">
+    <div class="option"><span class="option-emoji">⚔️</span> 긴장감 넘치는 액션 시리즈</div>
+    <div class="option"><span class="option-emoji">🌸</span> 따뜻한 로맨틱 코미디</div>
+    <div class="option"><span class="option-emoji">🧘</span> 잔잔한 자연 다큐멘터리</div>
+    <div class="option"><span class="option-emoji">🎯</span> 일단 뭐든 틀고 딴짓하기</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스타일 2 - 미니멀하고 깔끔</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    background: #fafafa;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: white;
+    border-radius: 4px;
+    padding: 50px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .progress-bar {
+    width: 100%;
+    height: 2px;
+    background: #eee;
+    margin-bottom: 40px;
+    border-radius: 2px;
+  }
+  .progress-fill {
+    width: 50%;
+    height: 100%;
+    background: #111;
+    border-radius: 2px;
+  }
+  .question-num { font-size: 11px; color: #aaa; letter-spacing: 3px; margin-bottom: 12px; text-transform: uppercase; }
+  h1 { font-size: 22px; color: #111; font-weight: 400; line-height: 1.5; margin-bottom: 35px; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option {
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    padding: 16px 20px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #333;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .option:hover { border-color: #111; color: #111; }
+  .option:hover .arrow { opacity: 1; }
+  .arrow { opacity: 0; font-size: 16px; color: #111; transition: opacity 0.15s; }
+  .style-tag {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #111;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+<div class="style-tag">스타일 2: 미니멀 & 클린</div>
+<div class="card">
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+  <div class="question-num">Question 3 of 6</div>
+  <h1>넷플릭스 마라톤을 한다면?</h1>
+  <div class="options">
+    <div class="option">긴장감 넘치는 액션 시리즈 <span class="arrow">→</span></div>
+    <div class="option">따뜻한 로맨틱 코미디 <span class="arrow">→</span></div>
+    <div class="option">잔잔한 자연 다큐멘터리 <span class="arrow">→</span></div>
+    <div class="option">일단 뭐든 틀고 딴짓하기 <span class="arrow">→</span></div>
+  </div>
+</div>
+</body>
+</html>
