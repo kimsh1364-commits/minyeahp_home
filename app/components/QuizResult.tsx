@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { PersonalityType } from "./QuizQuestion";
 
 type ResultData = {
@@ -52,12 +53,14 @@ export default function QuizResult({ type, onRestart }: Props) {
   return (
     <div className="w-full max-w-lg mx-auto">
       <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-        {/* Emoji Header */}
-        <div
-          className="flex items-center justify-center py-12"
-          style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 40%, #eab308 100%)" }}
-        >
-          <span className="text-8xl">{result.emoji}</span>
+        {/* Image Header */}
+        <div className="relative w-full h-56">
+          <Image
+            src="/minyeahp-quote.jpg"
+            alt="인생, 살아만 있다면 어떻게든 된다."
+            fill
+            className="object-cover"
+          />
         </div>
 
         {/* Content */}
@@ -84,7 +87,10 @@ export default function QuizResult({ type, onRestart }: Props) {
           >
             <p className="text-gray-500 text-sm mb-1">미녶의 한마디</p>
             <p className="text-gray-800 font-bold text-lg leading-relaxed">
-              인생, 살아만 있으면 어떻게든 된다. 🌱
+              인생, 살아만 있다면 어떻게든 된다.
+            </p>
+            <p className="text-gray-600 text-sm mt-2 leading-relaxed">
+              모든 결과에, 그럼에도 불구하고 잘 살아냅시다. 🌱
             </p>
           </div>
 
