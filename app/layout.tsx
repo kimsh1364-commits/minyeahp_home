@@ -1,30 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import SessionProvider from "@/components/SessionProvider";
 
 export const metadata: Metadata = {
-  title: "미녶 독자 유형은? | @minyeahp_",
-  description: "5개의 질문으로 알아보는 나의 미녶 독자 유형! @minyeahp_",
-  openGraph: {
-    title: "미녶 독자 유형은? | @minyeahp_",
-    description: "5개의 질문으로 알아보는 나의 미녶 독자 유형! @minyeahp_",
-    type: "website",
-  },
-  twitter: {
-    card: "summary",
-    title: "미녶 독자 유형은? | @minyeahp_",
-    description: "5개의 질문으로 알아보는 나의 미녶 독자 유형! @minyeahp_",
-  },
+  title: "PixelRoom - 픽셀 아트 드레스업 게임",
+  description: "나만의 픽셀 아트 치비 캐릭터를 꾸미고, 방을 꾸미고, 친구와 채팅하세요!",
 };
 
 export default function RootLayout({
@@ -34,10 +14,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className="antialiased">
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );
