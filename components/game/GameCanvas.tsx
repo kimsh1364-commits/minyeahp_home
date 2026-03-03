@@ -5,10 +5,11 @@ import { CharacterData, FurnitureItem, PlayerState } from "@/types/game";
 import { drawCharacter } from "./PixelCharacter";
 import { FURNITURE_CATALOG, WALLPAPERS, FLOORS } from "@/data/items";
 
-const TILE_SIZE = 32; // px per tile
+const TILE_SIZE = 32; // px per game tile
 const ROOM_W = 16;
 const ROOM_H = 12;
 const CHAR_SCALE = 2;
+const CHAR_TILE = 2; // pixel unit in character
 
 interface Props {
   character: CharacterData;
@@ -36,6 +37,12 @@ function buildCollisionMap(furniture: FurnitureItem[]): Set<string> {
   return blocked;
 }
 
+// D-pad button style helper
+const dpadBtnClass =
+  "w-12 h-12 flex items-center justify-center bg-gray-800/80 text-white text-xl font-bold " +
+  "rounded-lg border-2 border-gray-600 active:bg-gray-600 select-none touch-none " +
+  "shadow-md cursor-pointer hover:bg-gray-700 transition-colors";
+
 export default function GameCanvas({ character, furniture, wallpaper, floor, onPlayerMove }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const playerRef = useRef<PlayerState>({
@@ -44,7 +51,7 @@ export default function GameCanvas({ character, furniture, wallpaper, floor, onP
     isMoving: false,
   });
   const keysRef = useRef<Set<string>>(new Set());
-  const frameRef = useRef(0);
+  const frameRef = useRef(0); // 0 or 1 (2-frame animation)
   const animFrameRef = useRef(0);
   const frameCountRef = useRef(0);
 
@@ -67,15 +74,12 @@ export default function GameCanvas({ character, furniture, wallpaper, floor, onP
       }
     }
 
-    // ── Walls (top row) ──
+    // ── Walls (top 2 rows) ──
     const wallColor = getTileColor(WALLPAPERS, wallpaper, "#F9FAFB");
     ctx.fillStyle = wallColor;
     ctx.fillRect(0, 0, ROOM_W * TILE_SIZE, 2 * TILE_SIZE);
-    // wall bottom shadow
     ctx.fillStyle = "rgba(0,0,0,0.1)";
     ctx.fillRect(0, 2 * TILE_SIZE, ROOM_W * TILE_SIZE, 4);
-
-    // wall detail: baseboard
     ctx.fillStyle = "rgba(255,255,255,0.4)";
     ctx.fillRect(0, 2 * TILE_SIZE - 4, ROOM_W * TILE_SIZE, 4);
 
@@ -88,25 +92,16 @@ export default function GameCanvas({ character, furniture, wallpaper, floor, onP
       const fw = cat.width * TILE_SIZE;
       const fh = cat.height * TILE_SIZE;
 
-      // shadow
       ctx.fillStyle = "rgba(0,0,0,0.15)";
       ctx.fillRect(fx + 4, fy + fh - 4, fw, 6);
-
-      // body
       ctx.fillStyle = cat.color;
       ctx.fillRect(fx, fy, fw, fh);
-
-      // highlight
       ctx.fillStyle = "rgba(255,255,255,0.3)";
       ctx.fillRect(fx, fy, fw, 4);
       ctx.fillRect(fx, fy, 4, fh);
-
-      // outline
       ctx.strokeStyle = "rgba(0,0,0,0.3)";
       ctx.lineWidth = 1;
       ctx.strokeRect(fx + 0.5, fy + 0.5, fw - 1, fh - 1);
-
-      // label
       ctx.fillStyle = "rgba(0,0,0,0.5)";
       ctx.font = `bold ${Math.max(8, TILE_SIZE / 3)}px monospace`;
       ctx.textAlign = "center";
@@ -114,16 +109,19 @@ export default function GameCanvas({ character, furniture, wallpaper, floor, onP
     }
 
     // ── Character ──
+    // 16 units body height + 4 units hat space → total 20 units
     const player = playerRef.current;
-    const charX = player.position.x * TILE_SIZE - (8 * 2 * CHAR_SCALE) / 2;
-    const charY = player.position.y * TILE_SIZE - (13 * 2 * CHAR_SCALE);
+    const charW = 8 * CHAR_TILE * CHAR_SCALE;
+    const charBodyH = 16 * CHAR_TILE * CHAR_SCALE; // feet at bottom of body
+    const charX = player.position.x * TILE_SIZE - charW / 2;
+    const charY = player.position.y * TILE_SIZE - charBodyH;
     drawCharacter(ctx, character, player.direction, frameRef.current, CHAR_SCALE, charX, charY);
 
-    // ── Username (if available) ──
+    // ── Player name ──
     ctx.fillStyle = "rgba(0,0,0,0.7)";
     ctx.font = "bold 10px monospace";
     ctx.textAlign = "center";
-    ctx.fillText("나", player.position.x * TILE_SIZE, player.position.y * TILE_SIZE - 28);
+    ctx.fillText("나", player.position.x * TILE_SIZE, player.position.y * TILE_SIZE - charBodyH - 4);
   }, [character, furniture, wallpaper, floor]);
 
   const gameLoop = useCallback(() => {
@@ -133,7 +131,7 @@ export default function GameCanvas({ character, furniture, wallpaper, floor, onP
     let moved = false;
 
     frameCountRef.current++;
-    // move every 8 frames (~8fps movement)
+    // 이동: 8프레임마다 (~8fps)
     if (frameCountRef.current % 8 === 0) {
       let nx = player.position.x;
       let ny = player.position.y;
@@ -151,7 +149,6 @@ export default function GameCanvas({ character, furniture, wallpaper, floor, onP
       }
 
       if (moving) {
-        // clamp to room + wall boundary
         nx = Math.max(0, Math.min(ROOM_W - 1, nx));
         ny = Math.max(2, Math.min(ROOM_H - 1, ny));
 
@@ -160,12 +157,9 @@ export default function GameCanvas({ character, furniture, wallpaper, floor, onP
           moved = true;
         }
         player.direction = dir;
-        player.isMoving = moving;
-
-        // walking animation
-        if (moving) {
-          frameRef.current = (frameRef.current + 1) % 4;
-        }
+        player.isMoving = true;
+        // 2-frame 걷기 애니메이션
+        frameRef.current = (frameRef.current + 1) % 2;
       } else {
         player.isMoving = false;
         frameRef.current = 0;
@@ -198,18 +192,71 @@ export default function GameCanvas({ character, furniture, wallpaper, floor, onP
     };
   }, [gameLoop]);
 
+  // D-pad 버튼 핸들러
+  const pressKey = useCallback((key: string) => {
+    keysRef.current.add(key);
+  }, []);
+  const releaseKey = useCallback((key: string) => {
+    keysRef.current.delete(key);
+  }, []);
+
   return (
-    <div className="relative">
+    <div className="relative inline-block">
       <canvas
         ref={canvasRef}
         width={ROOM_W * TILE_SIZE}
         height={ROOM_H * TILE_SIZE}
-        style={{ imageRendering: "pixelated", border: "3px solid #555", borderRadius: 4 }}
+        style={{ imageRendering: "pixelated", border: "3px solid #555", borderRadius: 4, display: "block" }}
         tabIndex={0}
         className="outline-none"
       />
-      <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded font-mono">
-        WASD / 방향키로 이동
+
+      {/* ── 화면 방향키 D-패드 ── */}
+      <div
+        className="absolute bottom-4 right-4 flex flex-col items-center gap-1"
+        style={{ userSelect: "none" }}
+      >
+        {/* 위 */}
+        <button
+          className={dpadBtnClass}
+          onPointerDown={() => pressKey("ArrowUp")}
+          onPointerUp={() => releaseKey("ArrowUp")}
+          onPointerLeave={() => releaseKey("ArrowUp")}
+        >
+          ▲
+        </button>
+        {/* 중간 행 */}
+        <div className="flex gap-1">
+          <button
+            className={dpadBtnClass}
+            onPointerDown={() => pressKey("ArrowLeft")}
+            onPointerUp={() => releaseKey("ArrowLeft")}
+            onPointerLeave={() => releaseKey("ArrowLeft")}
+          >
+            ◀
+          </button>
+          {/* 중앙 */}
+          <div className="w-12 h-12 rounded-lg bg-gray-800/60 border-2 border-gray-600 flex items-center justify-center">
+            <span className="text-gray-400 text-xs font-mono">●</span>
+          </div>
+          <button
+            className={dpadBtnClass}
+            onPointerDown={() => pressKey("ArrowRight")}
+            onPointerUp={() => releaseKey("ArrowRight")}
+            onPointerLeave={() => releaseKey("ArrowRight")}
+          >
+            ▶
+          </button>
+        </div>
+        {/* 아래 */}
+        <button
+          className={dpadBtnClass}
+          onPointerDown={() => pressKey("ArrowDown")}
+          onPointerUp={() => releaseKey("ArrowDown")}
+          onPointerLeave={() => releaseKey("ArrowDown")}
+        >
+          ▼
+        </button>
       </div>
     </div>
   );

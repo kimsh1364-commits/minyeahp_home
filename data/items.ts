@@ -7,15 +7,13 @@ export const SKIN_TONES: GameItem[] = [
   { id: "dark", name: "어두운 피부", category: "skinTone", color: "#8D5524" },
 ];
 
+// 헤어 컬러: 검정/노랑/보라/핑크/하늘색
 export const HAIR_COLORS: GameItem[] = [
   { id: "black", name: "검정", category: "hairColor", color: "#1a1a1a" },
-  { id: "brown", name: "갈색", category: "hairColor", color: "#8B4513" },
-  { id: "blonde", name: "금발", category: "hairColor", color: "#F4C430" },
-  { id: "red", name: "빨강", category: "hairColor", color: "#C0392B" },
-  { id: "pink", name: "핑크", category: "hairColor", color: "#FF69B4" },
+  { id: "yellow", name: "노랑", category: "hairColor", color: "#FFD700" },
   { id: "purple", name: "보라", category: "hairColor", color: "#8B5CF6" },
-  { id: "blue", name: "파랑", category: "hairColor", color: "#3B82F6" },
-  { id: "white", name: "흰색", category: "hairColor", color: "#F8F8F8" },
+  { id: "pink", name: "핑크", category: "hairColor", color: "#FF69B4" },
+  { id: "sky_blue", name: "하늘색", category: "hairColor", color: "#87CEEB" },
 ];
 
 export const EYE_COLORS: GameItem[] = [
@@ -26,33 +24,34 @@ export const EYE_COLORS: GameItem[] = [
   { id: "red", name: "빨간 눈", category: "eyeColor", color: "#EF4444" },
 ];
 
+// 헤어 스타일: 쇼트커트/긴머리/단발머리/토끼모자/비둘기모자/고양이모자/곱슬
 export const HAIR_STYLES: GameItem[] = [
-  { id: "short", name: "단발", category: "hairStyle" },
-  { id: "long", name: "장발", category: "hairStyle" },
-  { id: "twin", name: "양갈래", category: "hairStyle" },
-  { id: "bob", name: "단정한 단발", category: "hairStyle" },
-  { id: "curly", name: "웨이브", category: "hairStyle" },
-  { id: "ponytail", name: "포니테일", category: "hairStyle" },
+  { id: "short_cut", name: "쇼트커트", category: "hairStyle" },
+  { id: "long_hair", name: "긴머리", category: "hairStyle" },
+  { id: "bob_hair", name: "단발머리", category: "hairStyle" },
+  { id: "bunny_hat", name: "토끼모자", category: "hairStyle" },
+  { id: "pigeon_hat", name: "비둘기모자", category: "hairStyle" },
+  { id: "cat_hat", name: "고양이모자", category: "hairStyle" },
+  { id: "curly", name: "곱슬머리", category: "hairStyle" },
 ];
 
+// 상의: 티셔츠/재킷/오버롤/갑옷/망토/줄무늬
 export const TOPS: GameItem[] = [
-  { id: "default_top", name: "흰 티셔츠", category: "top", color: "#FFFFFF", previewColor: "#FFFFFF" },
-  { id: "stripe_top", name: "스트라이프", category: "top", color: "#4A90E2", previewColor: "#4A90E2" },
-  { id: "hoodie", name: "후디", category: "top", color: "#6B7280", previewColor: "#6B7280" },
-  { id: "pink_top", name: "핑크 블라우스", category: "top", color: "#F9A8D4", previewColor: "#F9A8D4" },
-  { id: "green_top", name: "초록 셔츠", category: "top", color: "#86EFAC", previewColor: "#86EFAC" },
-  { id: "yellow_top", name: "노랑 티", category: "top", color: "#FDE68A", previewColor: "#FDE68A" },
-  { id: "red_top", name: "빨강 스웨터", category: "top", color: "#FCA5A5", previewColor: "#FCA5A5" },
-  { id: "purple_top", name: "보라 블라우스", category: "top", color: "#C4B5FD", previewColor: "#C4B5FD" },
+  { id: "t_shirt", name: "티셔츠", category: "top", color: "#FFFFFF", previewColor: "#FFFFFF" },
+  { id: "jacket", name: "재킷", category: "top", color: "#4A90E2", previewColor: "#4A90E2" },
+  { id: "overall", name: "오버롤", category: "top", color: "#2563EB", previewColor: "#2563EB" },
+  { id: "armor", name: "갑옷", category: "top", color: "#9CA3AF", previewColor: "#9CA3AF" },
+  { id: "cape", name: "망토", category: "top", color: "#7C3AED", previewColor: "#7C3AED" },
+  { id: "striped", name: "줄무늬", category: "top", color: "#EF4444", previewColor: "#EF4444" },
 ];
 
+// 하의: 청바지/치마/호박바지/반바지/롱스커트
 export const BOTTOMS: GameItem[] = [
-  { id: "default_bottom", name: "청바지", category: "bottom", color: "#2563EB", previewColor: "#2563EB" },
-  { id: "black_pants", name: "검정 바지", category: "bottom", color: "#1F2937", previewColor: "#1F2937" },
-  { id: "skirt_pink", name: "핑크 치마", category: "bottom", color: "#FBCFE8", previewColor: "#FBCFE8" },
-  { id: "skirt_white", name: "흰 치마", category: "bottom", color: "#F9FAFB", previewColor: "#F9FAFB" },
-  { id: "shorts_blue", name: "파랑 반바지", category: "bottom", color: "#93C5FD", previewColor: "#93C5FD" },
-  { id: "green_pants", name: "초록 바지", category: "bottom", color: "#86EFAC", previewColor: "#86EFAC" },
+  { id: "jeans", name: "청바지", category: "bottom", color: "#2563EB", previewColor: "#2563EB" },
+  { id: "skirt", name: "치마", category: "bottom", color: "#FBCFE8", previewColor: "#FBCFE8" },
+  { id: "pumpkin_pants", name: "호박바지", category: "bottom", color: "#F97316", previewColor: "#F97316" },
+  { id: "shorts", name: "반바지", category: "bottom", color: "#93C5FD", previewColor: "#93C5FD" },
+  { id: "long_skirt", name: "롱스커트", category: "bottom", color: "#C4B5FD", previewColor: "#C4B5FD" },
 ];
 
 export const SHOES: GameItem[] = [
@@ -68,8 +67,6 @@ export const HATS: GameItem[] = [
   { id: "beret_black", name: "검정 베레모", category: "hat", color: "#1F2937" },
   { id: "beret_red", name: "빨강 베레모", category: "hat", color: "#DC2626" },
   { id: "cap_blue", name: "파랑 야구모자", category: "hat", color: "#2563EB" },
-  { id: "cat_ears", name: "고양이 귀", category: "hat", color: "#F9A8D4" },
-  { id: "bunny_ears", name: "토끼 귀", category: "hat", color: "#F9FAFB" },
   { id: "flower_crown", name: "꽃 왕관", category: "hat", color: "#FDE68A" },
 ];
 

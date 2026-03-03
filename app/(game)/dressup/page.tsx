@@ -38,8 +38,8 @@ const ITEM_MAP: Record<string, typeof TOPS> = {
 
 const DEFAULT_CHARACTER: CharacterData = {
   id: "", userId: "",
-  skinTone: "light", hairStyle: "short", hairColor: "black",
-  eyeColor: "brown", top: "default_top", bottom: "default_bottom",
+  skinTone: "light", hairStyle: "short_cut", hairColor: "black",
+  eyeColor: "brown", top: "t_shirt", bottom: "jeans",
   shoes: "default_shoes", hat: "none", accessory: "none",
 };
 

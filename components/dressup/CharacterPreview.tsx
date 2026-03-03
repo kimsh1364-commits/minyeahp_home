@@ -14,8 +14,8 @@ export default function CharacterPreview({ character }: Props) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setFrame((f) => (f + 1) % 4);
-    }, 200);
+      setFrame((f) => (f + 1) % 2);
+    }, 300);
     return () => clearInterval(interval);
   }, []);
 

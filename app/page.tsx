@@ -63,18 +63,22 @@ export default function Home() {
       </div>
 
       <div className="text-center mb-8 relative z-10">
-        <div className="text-5xl md:text-6xl mb-2 font-mono tracking-widest font-bold">
-          <span className="text-pink-400">P</span>
+        <div className="text-4xl md:text-5xl mb-2 font-mono tracking-widest font-bold">
+          <span className="text-pink-400">m</span>
           <span className="text-purple-400">i</span>
-          <span className="text-sky-400">x</span>
-          <span className="text-green-400">e</span>
-          <span className="text-yellow-400">l</span>
-          <span className="text-pink-400">R</span>
-          <span className="text-purple-400">o</span>
-          <span className="text-sky-400">o</span>
-          <span className="text-green-400">m</span>
+          <span className="text-sky-400">n</span>
+          <span className="text-green-400">y</span>
+          <span className="text-yellow-400">e</span>
+          <span className="text-pink-400">a</span>
+          <span className="text-purple-400">h</span>
+          <span className="text-sky-400">p</span>
+          <span className="text-green-400">_</span>
+          <span className="text-yellow-400">h</span>
+          <span className="text-pink-400">o</span>
+          <span className="text-purple-400">m</span>
+          <span className="text-sky-400">e</span>
         </div>
-        <p className="text-gray-500 font-mono text-sm">나만의 픽셀 아트 세계를 만들어보세요</p>
+        <p className="text-gray-500 font-mono text-sm">나만의 픽셀 아트 세계를 만들어보세요 ✦</p>
       </div>
 
       <div className="bg-white/90 backdrop-blur rounded-2xl shadow-lg border-2 border-pink-100 p-6 w-full max-w-sm relative z-10">
