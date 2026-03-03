@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "이미 사용 중인 이메일 또는 닉네임입니다." }, { status: 400 });
   }
 
-  const hashed = await bcrypt.hash(password, 10);
+  const hashed = await bcrypt.hash(password, 8);
   const user = await prisma.user.create({
     data: {
       email,
