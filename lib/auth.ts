@@ -1,12 +1,11 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/db";
-import bcrypt from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: "jwt" },
   pages: {
-    signIn: "/login",
+    signIn: "/",
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -27,21 +26,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        username: { label: "닉네임", type: "text" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+        const username = credentials?.username as string;
+        if (!username || username.trim().length < 2) return null;
+
+        let user = await prisma.user.findUnique({
+          where: { username: username.trim() },
         });
-        if (!user) return null;
-        const valid = await bcrypt.compare(
-          credentials.password as string,
-          user.password
-        );
-        if (!valid) return null;
-        return { id: user.id, email: user.email, name: user.username, username: user.username };
+
+        if (!user) {
+          user = await prisma.user.create({
+            data: {
+              username: username.trim(),
+              character: { create: {} },
+              room: { create: {} },
+            },
+          });
+        }
+
+        return { id: user.id, name: user.username, username: user.username };
       },
     }),
   ],
