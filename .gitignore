@@ -44,3 +44,10 @@ next-env.d.ts
 /app/generated/prisma
 *.db
 *.db-journal
+
+# local data store
+/data/db.json
+
+# vite
+/dist
+/.vite
