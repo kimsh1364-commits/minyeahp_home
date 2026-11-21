@@ -588,3 +588,197 @@ label.check {
 .toast {
   --tx: -50%;
 }
+
+/* ───── 쇼룸 ───── */
+.enter-showroom {
+  position: absolute;
+  right: 12px;
+  bottom: 70px;
+  z-index: 2;
+  border: 0;
+  padding: 9px 14px;
+  border-radius: 99px;
+  background: #f1d27a;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(120, 80, 20, 0.2);
+  cursor: pointer;
+}
+
+.showroom {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(120% 80% at 50% 30%, #fbf2d9 0%, #f3e3bd 70%, #ecd8aa 100%);
+  animation: fade 0.25s ease-out;
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+.sr-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: max(12px, env(safe-area-inset-top)) 16px 8px;
+}
+.sr-close {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 99px;
+  background: rgba(255, 250, 242, 0.9);
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(80, 55, 30, 0.12);
+}
+.sr-title {
+  flex: 1;
+  min-width: 0;
+}
+.sr-title b {
+  display: block;
+  font-size: 17px;
+}
+.sr-title small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.sr-mode {
+  display: flex;
+  padding: 3px;
+  border-radius: 99px;
+  background: rgba(255, 250, 242, 0.9);
+}
+.sr-mode button {
+  border: 0;
+  background: none;
+  padding: 6px 12px;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+}
+.sr-mode button.on {
+  background: var(--ink);
+  color: #fffaf2;
+}
+.sr-canvas {
+  flex: 1;
+  min-height: 0;
+  touch-action: none;
+}
+.sr-rooms {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px 16px;
+  scrollbar-width: none;
+}
+.sr-rooms::-webkit-scrollbar {
+  display: none;
+}
+.sr-rooms button {
+  flex: none;
+  border: 1px solid rgba(168, 106, 60, 0.25);
+  background: rgba(255, 250, 242, 0.85);
+  padding: 8px 14px;
+  border-radius: 99px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sr-rooms button.on {
+  background: var(--oak);
+  border-color: var(--oak);
+  color: #fff;
+}
+.sr-panel {
+  background: var(--card);
+  border-radius: 22px 22px 0 0;
+  padding: 4px 16px max(16px, env(safe-area-inset-bottom));
+  box-shadow: 0 -6px 20px rgba(80, 55, 30, 0.08);
+  max-height: 34vh;
+  overflow-y: auto;
+}
+.sr-handle {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 6px 0 8px;
+  cursor: pointer;
+}
+.sr-handle span {
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin: 0 auto;
+  border-radius: 99px;
+  background: var(--line);
+}
+.sr-room-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sr-room-head > div {
+  flex: 1;
+  min-width: 0;
+}
+.sr-room-head b {
+  display: block;
+  font-size: 17px;
+}
+.sr-room-head small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.sr-items {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+.sr-items li {
+  display: grid;
+  grid-template-columns: 26px 1fr auto;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 2px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+  opacity: 0.6;
+  cursor: pointer;
+}
+.sr-items li.done {
+  opacity: 1;
+}
+.sr-cost {
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.sr-sel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 4px;
+}
+.sr-sel > div:not(.right) {
+  flex: 1;
+  min-width: 0;
+}
+.sr-sel b {
+  display: block;
+  font-size: 16px;
+}
+.sr-sel small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}

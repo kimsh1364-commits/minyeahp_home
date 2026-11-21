@@ -14,6 +14,7 @@ import {
 } from "@/lib/finance";
 import { useEntries, useSettings } from "@/lib/store";
 
+const Showroom = dynamic(() => import("@/components/Showroom"), { ssr: false });
 const HouseCanvas = dynamic(() => import("@/components/HouseCanvas"), {
   ssr: false,
   loading: () => <div className="canvas-loading">집을 불러오는 중…</div>,
@@ -31,6 +32,7 @@ export default function Home() {
   const [tab, setTab] = useState<"build" | "dream">("build");
   const [selected, setSelected] = useState<string | null>(null);
   const [sheet, setSheet] = useState(false);
+  const [showroom, setShowroom] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [live, setLive] = useState<PriceResp | null>(null);
 
@@ -118,8 +120,11 @@ export default function Home() {
           </button>
         </div>
         <div className="canvas">
-          <HouseCanvas fraction={progress.fraction} nextId={next?.id ?? null} dream={tab === "dream"} onSelect={setSelected} />
+          {!showroom && <HouseCanvas fraction={progress.fraction} nextId={next?.id ?? null} dream={tab === "dream"} onSelect={setSelected} />}
         </div>
+        <button className="enter-showroom" onClick={() => setShowroom(true)}>
+          🛋️ 쇼룸 입장 · 방마다 보기
+        </button>
         <div className="stage-foot">
           {sel ? (
             <div className="chip">
@@ -277,6 +282,7 @@ export default function Home() {
 
       {sheet && <AddSheet onClose={() => setSheet(false)} onAdd={addEntry} />}
       {toast && <div className="toast">{toast}</div>}
+      {showroom && <Showroom progress={progress} saved={saved} onClose={() => setShowroom(false)} />}
     </main>
   );
 }

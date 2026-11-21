@@ -20,20 +20,20 @@ function cached(key: string, make: () => THREE.Texture) {
   return cache.get(key)!;
 }
 
-// 내추럴 오크 마루
+// 허니 오크 마루
 export const oakFloor = (rx: number, rz: number) =>
   cached(`oak-${rx}-${rz}`, () =>
     canvasTex(
       256,
       256,
       (g) => {
-        const tones = ["#d9a066", "#d39a5f", "#dda96f", "#cf955a", "#d6a26a"];
+        const tones = ["#d9a066", "#d39a5f", "#e0ad72", "#cf955a", "#d8a46b"];
         for (let i = 0; i < 8; i++) {
           const off = (i % 2) * 96;
           for (let x = -off; x < 256; x += 192) {
             g.fillStyle = tones[(i * 3 + Math.abs(x) / 96) % tones.length];
             g.fillRect(x, i * 32, 192, 32);
-            g.strokeStyle = "rgba(120,70,30,0.25)";
+            g.strokeStyle = "rgba(120,70,30,0.22)";
             g.lineWidth = 2;
             g.strokeRect(x, i * 32, 192, 32);
           }
@@ -43,18 +43,18 @@ export const oakFloor = (rx: number, rz: number) =>
     ),
   );
 
-// 민트 화이트 모자이크
+// 세이지 민트 모자이크 (2.5cm)
 export const mosaic = (rx: number, ry: number) =>
   cached(`mosaic-${rx}-${ry}`, () =>
     canvasTex(
       128,
       128,
       (g) => {
-        g.fillStyle = "#cfd8cc";
+        g.fillStyle = "#e3eadf";
         g.fillRect(0, 0, 128, 128);
         for (let x = 0; x < 128; x += 16)
           for (let y = 0; y < 128; y += 16) {
-            g.fillStyle = (x + y) % 48 === 0 ? "#e6ede3" : "#eef3ec";
+            g.fillStyle = (x * 7 + y * 3) % 80 === 0 ? "#bccdb9" : "#c7d6c3";
             g.fillRect(x + 1.5, y + 1.5, 13, 13);
           }
       },
@@ -62,41 +62,129 @@ export const mosaic = (rx: number, ry: number) =>
     ),
   );
 
-// 테라코타 타일
-export const terracotta = (rx: number, rz: number) =>
-  cached(`terra-${rx}-${rz}`, () =>
+// 화이트 페니 타일 (+ 민트 꽃무늬 포인트)
+export const penny = (rx: number, ry: number) =>
+  cached(`penny-${rx}-${ry}`, () =>
     canvasTex(
       128,
       128,
       (g) => {
-        g.fillStyle = "#e8d9c4";
+        g.fillStyle = "#dcdcd4";
         g.fillRect(0, 0, 128, 128);
-        const tones = ["#c98a63", "#c47f58", "#cf946c", "#bd7a54"];
-        for (let x = 0; x < 128; x += 32)
-          for (let y = 0; y < 128; y += 32) {
-            g.fillStyle = tones[((x + y * 3) / 32) % tones.length];
-            g.fillRect(x + 2, y + 2, 28, 28);
+        for (let y = 0; y < 128; y += 8)
+          for (let x = 0; x < 128; x += 8) {
+            const ox = (y / 8) % 2 ? 4 : 0;
+            const flower = (x === 64 && y === 64) || (Math.abs(x - 64) === 8 && y === 64) || (x === 64 && Math.abs(y - 64) === 8);
+            g.fillStyle = flower ? "#b9d0bc" : "#fbfbf7";
+            g.beginPath();
+            g.arc(x + ox + 4, y + 4, 3.3, 0, Math.PI * 2);
+            g.fill();
           }
       },
-      [rx, rz],
+      [rx, ry],
     ),
   );
 
-// 연그레이 현관 타일
-export const greyTile = (rx: number, rz: number) =>
-  cached(`grey-${rx}-${rz}`, () =>
+// 바둑판 체커
+export const checker = (a: string, b: string, n: number, rx: number, ry: number) =>
+  cached(`chk-${a}-${b}-${n}-${rx}-${ry}`, () =>
     canvasTex(
       128,
       128,
       (g) => {
-        g.fillStyle = "#bdbab3";
-        g.fillRect(0, 0, 128, 128);
-        for (let x = 0; x < 128; x += 64)
-          for (let y = 0; y < 128; y += 64) {
-            g.fillStyle = "#d8d5ce";
-            g.fillRect(x + 2, y + 2, 60, 60);
+        const s = 128 / n;
+        for (let i = 0; i < n; i++)
+          for (let j = 0; j < n; j++) {
+            g.fillStyle = (i + j) % 2 ? a : b;
+            g.fillRect(i * s, j * s, s, s);
           }
       },
-      [rx, rz],
+      [rx, ry],
+    ),
+  );
+
+// 버건디 빈티지 줄무늬 원단
+export const stripes = (rx = 1, ry = 1) =>
+  cached(`stripe-${rx}-${ry}`, () =>
+    canvasTex(
+      128,
+      128,
+      (g) => {
+        g.fillStyle = "#8a2a31";
+        g.fillRect(0, 0, 128, 128);
+        const lines: [number, number, string][] = [
+          [10, 2, "#e8d6bd"], [14, 1, "#e8d6bd"], [17, 3, "#c98a3d"], [22, 1, "#e8d6bd"],
+          [52, 2, "#e8d6bd"], [57, 2, "#5b1a20"], [62, 1, "#e8d6bd"],
+          [84, 1, "#e8d6bd"], [88, 3, "#c98a3d"], [93, 1, "#e8d6bd"], [96, 2, "#e8d6bd"],
+        ];
+        for (const [x, w, c] of lines) {
+          g.fillStyle = c;
+          g.fillRect(x, 0, w, 128);
+        }
+        // 직조 느낌
+        g.fillStyle = "rgba(0,0,0,0.06)";
+        for (let y = 0; y < 128; y += 3) g.fillRect(0, y, 128, 1);
+      },
+      [rx, ry],
+    ),
+  );
+
+// 버터 깅엄 체크
+export const gingham = (rx: number, ry: number, color = "rgba(236,196,92,0.55)") =>
+  cached(`ging-${rx}-${ry}-${color}`, () =>
+    canvasTex(
+      64,
+      64,
+      (g) => {
+        g.fillStyle = "#fffaf0";
+        g.fillRect(0, 0, 64, 64);
+        g.fillStyle = color;
+        g.fillRect(0, 0, 32, 64);
+        g.fillRect(0, 0, 64, 32);
+      },
+      [rx, ry],
+    ),
+  );
+
+// 책등 (책장 정면)
+export const books = () =>
+  cached("books", () =>
+    canvasTex(
+      256,
+      128,
+      (g) => {
+        g.fillStyle = "#b97a47";
+        g.fillRect(0, 0, 256, 128);
+        const colors = ["#8a2a31", "#e7c25f", "#5e7b4c", "#f3ead8", "#c9673e", "#3e4d63", "#d9a441", "#a9c1a0"];
+        for (const [y0, y1] of [[6, 60], [68, 122]]) {
+          let x = 6;
+          let i = y0;
+          while (x < 240) {
+            const w = 8 + ((i * 7) % 9);
+            const h = (y1 - y0) * (0.72 + ((i * 13) % 25) / 100);
+            g.fillStyle = colors[(i * 5) % colors.length];
+            g.fillRect(x, y1 - h, w, h);
+            x += w + 1;
+            i++;
+          }
+        }
+      },
+      [1, 1],
+    ),
+  );
+
+// 코듀로이 (골지 결)
+export const corduroy = (base: string, rx: number, ry: number) =>
+  cached(`cord-${base}-${rx}-${ry}`, () =>
+    canvasTex(
+      64,
+      64,
+      (g) => {
+        g.fillStyle = base;
+        g.fillRect(0, 0, 64, 64);
+        g.fillStyle = "rgba(120,80,20,0.12)";
+        for (let x = 0; x < 64; x += 4) g.fillRect(x, 0, 1.5, 64);
+      },
+      [rx, ry],
     ),
   );
