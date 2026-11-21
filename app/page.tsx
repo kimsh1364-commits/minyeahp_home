@@ -19,7 +19,10 @@ const HouseCanvas = dynamic(() => import("@/components/HouseCanvas"), {
   loading: () => <div className="canvas-loading">집을 불러오는 중…</div>,
 });
 
-type AreaGroup = { area: number; pyeong: number; count: number; avg: number; deals: { date: string; amount: number; floor: number }[] };
+type AreaGroup = { area: number; pyeong: number; count: number; window: number; avg: number; deals: { date: string; amount: number; floor: number }[] };
+// 신한에스빌 1차 전용면적 → 부르는 평형
+const PYEONG: Record<number, string> = { 67: "26평", 85: "31평" };
+
 type PriceResp = { ok: boolean; reason?: string; byArea?: AreaGroup[]; fetchedAt?: string; months?: string[] };
 
 export default function Home() {
@@ -46,7 +49,8 @@ export default function Home() {
       const g = groups.find((g) => g.area === settings.preferredArea);
       if (g) return g;
     }
-    return groups[0];
+    // 기본: 26평(전용 약 67㎡)에 가장 가까운 면적
+    return [...groups].sort((a, b) => Math.abs(a.area - 67) - Math.abs(b.area - 67))[0];
   }, [live, settings.preferredArea]);
 
   const price = areaGroup ? priceFromLive(areaGroup.avg, settings.priceBuffer) : settings.manualPrice;
@@ -183,7 +187,7 @@ export default function Home() {
             <>
               <span className="badge ok">실거래가 연동</span>
               <small>
-                최근 3개월 전용 {areaGroup.area}㎡ 평균 {won(areaGroup.avg)} ({areaGroup.count}건) + 여유 {Math.round(settings.priceBuffer * 100)}%
+                최근 {areaGroup.window}개월 {PYEONG[areaGroup.area] ?? `전용 ${areaGroup.area}㎡`} 평균 {won(areaGroup.avg)} ({areaGroup.count}건) + 여유 {Math.round(settings.priceBuffer * 100)}%
               </small>
             </>
           ) : (
@@ -195,7 +199,7 @@ export default function Home() {
                   : live.reason === "no-key"
                     ? "실거래가 API 키가 없어 직접 입력한 집값을 써요"
                     : live.ok
-                      ? "최근 3개월 거래가 없어 직접 입력한 집값을 써요"
+                      ? "최근 6개월 거래가 없어 직접 입력한 집값을 써요"
                       : "실거래가를 불러오지 못해 직접 입력한 집값을 써요"}
               </small>
             </>
@@ -205,7 +209,7 @@ export default function Home() {
           <div className="areas">
             {live.byArea.map((g) => (
               <button key={g.area} className={areaGroup?.area === g.area ? "on" : ""} onClick={() => setSettings({ ...settings, preferredArea: g.area })}>
-                전용 {g.area}㎡ · {won(g.avg)}
+                {PYEONG[g.area] ?? `전용 ${g.area}㎡`} · {won(g.avg)}
               </button>
             ))}
           </div>
