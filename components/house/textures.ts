@@ -188,3 +188,162 @@ export const corduroy = (base: string, rx: number, ry: number) =>
       [rx, ry],
     ),
   );
+
+// 그린 타탄 체크 (레퍼런스 소파)
+export const plaid = (rx: number, ry: number) =>
+  cached(`plaid-${rx}-${ry}`, () =>
+    canvasTex(
+      128,
+      128,
+      (g) => {
+        g.fillStyle = "#3f7a4e";
+        g.fillRect(0, 0, 128, 128);
+        g.fillStyle = "rgba(20,60,35,0.55)";
+        g.fillRect(0, 40, 128, 26);
+        g.fillRect(40, 0, 26, 128);
+        g.fillStyle = "rgba(240,230,205,0.75)";
+        for (const v of [20, 100]) {
+          g.fillRect(0, v, 128, 3);
+          g.fillRect(v, 0, 3, 128);
+        }
+        g.fillStyle = "rgba(240,230,205,0.35)";
+        for (const v of [52, 58]) {
+          g.fillRect(0, v, 128, 1.5);
+          g.fillRect(v, 0, 1.5, 128);
+        }
+      },
+      [rx, ry],
+    ),
+  );
+
+// 도트
+export const dots = (bg: string, dot: string, n: number, rx: number, ry: number) =>
+  cached(`dots-${bg}-${dot}-${n}-${rx}-${ry}`, () =>
+    canvasTex(
+      128,
+      128,
+      (g) => {
+        g.fillStyle = bg;
+        g.fillRect(0, 0, 128, 128);
+        g.fillStyle = dot;
+        const s = 128 / n;
+        for (let i = 0; i < n; i++)
+          for (let j = 0; j < n; j++) {
+            g.beginPath();
+            g.arc(i * s + s / 2 + (j % 2 ? s / 2 : 0), j * s + s / 2, s * 0.2, 0, Math.PI * 2);
+            g.fill();
+            if (j % 2) {
+              g.beginPath();
+              g.arc(i * s + s / 2 - s / 2, j * s + s / 2, s * 0.2, 0, Math.PI * 2);
+              g.fill();
+            }
+          }
+      },
+      [rx, ry],
+    ),
+  );
+
+// 아가일 러그
+export const argyle = (rx: number, ry: number) =>
+  cached(`argyle-${rx}-${ry}`, () =>
+    canvasTex(
+      128,
+      128,
+      (g) => {
+        g.fillStyle = "#e9e2d4";
+        g.fillRect(0, 0, 128, 128);
+        g.fillStyle = "#8f8a7e";
+        for (const [cx, cy] of [[32, 32], [96, 96]]) {
+          g.beginPath();
+          g.moveTo(cx, cy - 24);
+          g.lineTo(cx + 16, cy);
+          g.lineTo(cx, cy + 24);
+          g.lineTo(cx - 16, cy);
+          g.fill();
+        }
+      },
+      [rx, ry],
+    ),
+  );
+
+// 블루 타원 러그: 하얀 토끼 + 작은 꽃
+export const bunnyRug = () =>
+  cached("bunnyrug", () =>
+    canvasTex(
+      256,
+      256,
+      (g) => {
+        g.fillStyle = "#24479a";
+        g.fillRect(0, 0, 256, 256);
+        // 토끼 (단순한 실루엣)
+        g.fillStyle = "#fbf8f0";
+        g.beginPath();
+        g.ellipse(128, 140, 70, 34, -0.15, 0, Math.PI * 2);
+        g.fill();
+        g.beginPath();
+        g.arc(70, 120, 26, 0, Math.PI * 2);
+        g.fill();
+        g.beginPath();
+        g.ellipse(52, 82, 9, 28, -0.4, 0, Math.PI * 2);
+        g.fill();
+        g.beginPath();
+        g.ellipse(76, 80, 9, 28, 0.15, 0, Math.PI * 2);
+        g.fill();
+        g.fillStyle = "#24479a";
+        g.beginPath();
+        g.arc(64, 118, 3.5, 0, Math.PI * 2);
+        g.fill();
+        // 꽃
+        const flower = (x: number, y: number, c: string) => {
+          g.fillStyle = c;
+          for (let i = 0; i < 5; i++) {
+            const a = (i / 5) * Math.PI * 2;
+            g.beginPath();
+            g.arc(x + Math.cos(a) * 7, y + Math.sin(a) * 7, 6, 0, Math.PI * 2);
+            g.fill();
+          }
+          g.fillStyle = "#f6d55c";
+          g.beginPath();
+          g.arc(x, y, 4, 0, Math.PI * 2);
+          g.fill();
+        };
+        [[40, 200, "#f4b6c2"], [200, 60, "#f6d55c"], [210, 200, "#a9c8ea"], [130, 40, "#fbf8f0"], [100, 220, "#f4b6c2"], [220, 130, "#fbf8f0"]].forEach(([x, y, c]) =>
+          flower(x as number, y as number, c as string),
+        );
+      },
+      [1, 1],
+    ),
+  );
+
+// 파스텔 패치워크 쿠션
+export const patchwork = () =>
+  cached("patch", () =>
+    canvasTex(
+      96,
+      96,
+      (g) => {
+        const cs = ["#f6d55c", "#f4b6c2", "#fbf8f0", "#bfe3c9", "#a9c8ea", "#f3d9a4", "#fbf8f0", "#bfe3c9", "#f6d55c"];
+        cs.forEach((c, i) => {
+          g.fillStyle = c;
+          g.fillRect((i % 3) * 32 + 1, Math.floor(i / 3) * 32 + 1, 30, 30);
+        });
+      },
+      [1, 1],
+    ),
+  );
+
+// 핑크 스트라이프 (드럼 펜던트)
+export const pinkStripe = () =>
+  cached("pinkstripe", () =>
+    canvasTex(
+      32,
+      64,
+      (g) => {
+        g.fillStyle = "#fff6f3";
+        g.fillRect(0, 0, 32, 64);
+        g.fillStyle = "#ee8fa6";
+        for (let y = 0; y < 64; y += 6) g.fillRect(0, y, 32, 2.5);
+      },
+      [1, 1],
+    ),
+  );
