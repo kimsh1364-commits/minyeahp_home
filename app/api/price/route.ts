@@ -1,0 +1,98 @@
+import { NextResponse } from "next/server";
+
+// 국토교통부 아파트 매매 실거래가 (공공데이터포털)
+// 필요한 환경변수: MOLIT_API_KEY (공공데이터포털 "일반 인증키(Decoding)")
+const ENDPOINT = "https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade";
+
+// 2026.2 화성시 분구 → 병점구. 분구 전 거래는 옛 화성시 코드(41590)로 남아 있을 수 있어 둘 다 조회
+const LAWD_CDS = (process.env.LAWD_CDS ?? "41595,41590").split(",").map((s) => s.trim()).filter(Boolean);
+const APT_KEYWORD = process.env.APT_KEYWORD ?? "신한에스빌";
+const APT_EXCLUDE = process.env.APT_EXCLUDE ?? "2단지,2차";
+const UMD = process.env.APT_UMD ?? "병점동";
+const MONTHS = 3;
+
+export const revalidate = 21600; // 6시간 캐시
+
+type Deal = { date: string; amount: number; area: number; floor: number; name: string };
+
+function tag(xml: string, name: string) {
+  const m = xml.match(new RegExp(`<${name}>\\s*([^<]*?)\\s*</${name}>`));
+  return m ? m[1] : "";
+}
+
+async function fetchMonth(lawd: string, ymd: string, key: string): Promise<Deal[]> {
+  const url = `${ENDPOINT}?serviceKey=${encodeURIComponent(key)}&LAWD_CD=${lawd}&DEAL_YMD=${ymd}&pageNo=1&numOfRows=1000`;
+  const res = await fetch(url, { next: { revalidate } });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const xml = await res.text();
+  const excludes = APT_EXCLUDE.split(",").map((s) => s.trim()).filter(Boolean);
+  const items = xml.split("<item>").slice(1);
+  return items
+    .map((it) => ({
+      name: tag(it, "aptNm"),
+      umd: tag(it, "umdNm"),
+      cancelled: tag(it, "cdealType").trim() !== "",
+      amount: Number(tag(it, "dealAmount").replace(/,/g, "")),
+      area: Number(tag(it, "excluUseAr")),
+      floor: Number(tag(it, "floor")),
+      date: `${tag(it, "dealYear")}-${tag(it, "dealMonth").padStart(2, "0")}-${tag(it, "dealDay").padStart(2, "0")}`,
+    }))
+    .filter(
+      (d) =>
+        d.name.includes(APT_KEYWORD) &&
+        !excludes.some((e) => d.name.includes(e)) &&
+        (!UMD || d.umd.includes(UMD)) &&
+        !d.cancelled &&
+        d.amount > 0,
+    )
+    .map(({ name, amount, area, floor, date }) => ({ name, amount, area, floor, date }));
+}
+
+export async function GET() {
+  const key = process.env.MOLIT_API_KEY;
+  if (!key) return NextResponse.json({ ok: false, reason: "no-key" });
+
+  const now = new Date();
+  const months: string[] = [];
+  for (let i = 0; i < MONTHS; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(`${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}`);
+  }
+
+  try {
+    const results = await Promise.allSettled(months.flatMap((m) => LAWD_CDS.map((c) => fetchMonth(c, m, key))));
+    const errors = results.filter((r) => r.status === "rejected").length;
+    if (errors === results.length) throw new Error("all requests failed");
+
+    const seen = new Set<string>();
+    const deals: Deal[] = [];
+    for (const r of results) {
+      if (r.status !== "fulfilled") continue;
+      for (const d of r.value) {
+        const k = `${d.date}-${d.amount}-${d.area}-${d.floor}`;
+        if (!seen.has(k)) (seen.add(k), deals.push(d));
+      }
+    }
+    deals.sort((a, b) => b.date.localeCompare(a.date));
+
+    // 전용면적(소수 첫째 자리 반올림)별 그룹
+    const groups = new Map<number, Deal[]>();
+    for (const d of deals) {
+      const a = Math.round(d.area);
+      groups.set(a, [...(groups.get(a) ?? []), d]);
+    }
+    const byArea = [...groups.entries()]
+      .map(([area, list]) => ({
+        area,
+        pyeong: Math.round((area * 1.33) / 3.3058), // 공급면적 대략 환산
+        count: list.length,
+        avg: Math.round(list.reduce((s, d) => s + d.amount, 0) / list.length),
+        deals: list.slice(0, 5),
+      }))
+      .sort((a, b) => a.area - b.area);
+
+    return NextResponse.json({ ok: true, months, byArea, fetchedAt: new Date().toISOString() });
+  } catch (e) {
+    return NextResponse.json({ ok: false, reason: "fetch-failed", message: String(e) });
+  }
+}
