@@ -26,7 +26,7 @@ export default function Showroom({ progress, saved, onClose }: { progress: Progr
   }, []);
 
   useEffect(() => {
-    const id = setInterval(() => setMeLabel(ME.label + (ME.room ? ` · ${ROOMS[ME.room].name}` : "")), 400);
+    const id = setInterval(() => setMeLabel(ME.room ? `지금 ${ROOMS[ME.room].name}에 있어요` : "집 안을 돌아다니는 중"), 400);
     return () => clearInterval(id);
   }, []);
 

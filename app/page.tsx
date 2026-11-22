@@ -13,6 +13,7 @@ import {
   type Entry,
 } from "@/lib/finance";
 import { useEntries, useSettings } from "@/lib/store";
+import { cheer } from "@/components/house/Me";
 
 const Showroom = dynamic(() => import("@/components/Showroom"), { ssr: false });
 const HouseCanvas = dynamic(() => import("@/components/HouseCanvas"), {
@@ -34,6 +35,9 @@ export default function Home() {
   const [sheet, setSheet] = useState(false);
   const [showroom, setShowroom] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [resist, setResist] = useState(false);
+  const [celebrate, setCelebrate] = useState<{ amount: number; what: string; line: string } | null>(null);
+  const [cheerFocus, setCheerFocus] = useState(false);
   const [live, setLive] = useState<PriceResp | null>(null);
 
   // 앱 열 때마다 실거래가 갱신
@@ -120,7 +124,9 @@ export default function Home() {
           </button>
         </div>
         <div className="canvas">
-          {!showroom && <HouseCanvas fraction={progress.fraction} nextId={next?.id ?? null} dream={tab === "dream"} onSelect={setSelected} />}
+          {!showroom && (
+            <HouseCanvas fraction={progress.fraction} nextId={next?.id ?? null} dream={tab === "dream"} focus={cheerFocus ? "me" : null} onSelect={setSelected} />
+          )}
         </div>
         <button className="enter-showroom" onClick={() => setShowroom(true)}>
           🛋️ 쇼룸 입장 · 방마다 보기
@@ -276,9 +282,53 @@ export default function Home() {
 
       <SettingsCard settings={settings} setSettings={setSettings} />
 
-      <button className="fab" onClick={() => setSheet(true)}>
-        + 저축하기
-      </button>
+      <div className="fabs">
+        <button className="fab-resist" onClick={() => setResist(true)}>
+          🙅 참았어요
+        </button>
+        <button className="fab" onClick={() => setSheet(true)}>
+          + 저축하기
+        </button>
+      </div>
+
+      {resist && (
+        <ResistSheet
+          onClose={() => setResist(false)}
+          onDone={(amount, what) => {
+            // 실제 저축이 아니라서 금액은 바꾸지 않고, 캐릭터만 신나게
+            setTab("dream");
+            setCheerFocus(true);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            setTimeout(cheer, 350);
+            setCelebrate({ amount, what, line: CHEERS[Math.floor(Math.random() * CHEERS.length)] });
+            setTimeout(() => {
+              setCelebrate(null);
+              setCheerFocus(false);
+            }, 4200);
+          }}
+        />
+      )}
+      {celebrate && (
+        <div className="celebrate" onClick={() => setCelebrate(null)}>
+          <div className="confetti" aria-hidden>
+            {["⭐", "💛", "✨", "💚", "⭐", "💙", "✨", "💗"].map((c, i) => (
+              <span key={i} style={{ left: `${8 + i * 12}%`, animationDelay: `${i * 0.08}s` }}>
+                {c}
+              </span>
+            ))}
+          </div>
+          <p className="c-what">{celebrate.what} 참기 성공!</p>
+          <p className="c-main">
+            <b>{celebrate.amount.toLocaleString()}원</b>을 아꼈어요!
+            <br />집을 조금 더 빨리 지을 수 있어요!
+          </p>
+          {settings.monthlyNow > 0 && (
+            <p className="c-sub">
+              모으면 입주가 약 {Math.max(0.1, Math.round((celebrate.amount / ((settings.monthlyNow * 10000) / 30)) * 10) / 10)}일 앞당겨지는 금액 · {celebrate.line}
+            </p>
+          )}
+        </div>
+      )}
 
       {sheet && <AddSheet onClose={() => setSheet(false)} onAdd={addEntry} />}
       {toast && <div className="toast">{toast}</div>}
@@ -314,11 +364,7 @@ function AddSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (e: Entry) =
   const today = new Date();
   const [date, setDate] = useState(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`);
   const n = Number(amount);
-  const quick = [
-    { label: "월급날 저축", v: 100 },
-    { label: "배달 참기", v: 2 },
-    { label: "커피 참기", v: 0.5 },
-  ];
+  const quick = [{ label: "월급날 저축", v: 100 }];
   return (
     <div className="sheet-bg" onClick={onClose}>
       <form
@@ -398,5 +444,52 @@ function SettingsCard({ settings, setSettings }: { settings: ReturnType<typeof u
       </label>
       <p className="fine">기록은 이 브라우저에만 저장돼요. 디딤돌 한도·LTV와 취득세 감면은 매수 시점 기준으로 다시 확인하세요.</p>
     </details>
+  );
+}
+
+const CHEERS = ["나 진짜 대단해 🏡", "우리집 벽돌 하나 쌓았다 🧱", "토끼 쿠션이 박수 치는 중 🐰", "버터 냉장고가 기다려 💛", "오늘도 참은 나 칭찬해 ✨"];
+
+const RESIST_OPTIONS = [
+  { what: "배달", emoji: "🛵", v: 20000 },
+  { what: "쇼핑", emoji: "🛍️", v: 30000 },
+  { what: "커피", emoji: "☕", v: 5000 },
+  { what: "간식", emoji: "🍩", v: 4000 },
+  { what: "택시", emoji: "🚕", v: 12000 },
+];
+
+function ResistSheet({ onClose, onDone }: { onClose: () => void; onDone: (amount: number, what: string) => void }) {
+  const [what, setWhat] = useState("배달");
+  const [amount, setAmount] = useState("20000");
+  const n = Number(amount);
+  return (
+    <div className="sheet-bg" onClick={onClose}>
+      <form
+        className="sheet"
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!n) return;
+          onDone(n, what);
+          onClose();
+        }}
+      >
+        <h2>뭘 참았어요? 🙅</h2>
+        <div className="quick">
+          {RESIST_OPTIONS.map((o) => (
+            <button type="button" key={o.what} className={what === o.what ? "on" : ""} onClick={() => (setWhat(o.what), setAmount(String(o.v)))}>
+              {o.emoji} {o.what}
+            </button>
+          ))}
+        </div>
+        <label>
+          아낀 금액 (원)
+          <input inputMode="numeric" value={amount ? Number(amount).toLocaleString() : ""} onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))} placeholder="20,000" />
+        </label>
+        <p className="fine">실제 저축 금액에는 더해지지 않아요. 참은 나를 칭찬하는 버튼이에요.</p>
+        <button className="primary" disabled={!n}>
+          참았다! 🎉
+        </button>
+      </form>
+    </div>
   );
 }

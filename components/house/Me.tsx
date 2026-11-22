@@ -2,19 +2,28 @@
 
 import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { Ball, C, Cyl, Star, roomAt, type RoomId } from "./kit";
 import { dots } from "./textures";
 
 // "나"가 지금 어디서 뭘 하는지 (TV 화면, 카메라 따라가기에서 읽음)
-export const ME: { x: number; z: number; activity: Activity | "walk"; room: RoomId | null; label: string } = {
+export const ME: { x: number; z: number; activity: Activity | "walk"; room: RoomId | null; label: string; cheerAt: number } = {
   x: 5.2,
   z: 6.1,
   activity: "walk",
   room: "living",
   label: "🚶 걷는 중",
+  cheerAt: -1e9,
 };
+
+// 테스트용 (?speed= 붙였을 때만)
+if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("speed")) (window as unknown as { __ME: typeof ME }).__ME = ME;
+
+// 참았어요! → 캐릭터가 신나서 점프 + 별·하트 팡팡
+export function cheer() {
+  ME.cheerAt = performance.now();
+}
+const CHEER_MS = 2800;
 
 type Activity = "sofa" | "cook" | "desk" | "flowers" | "tv";
 type Spot = { route: [number, number][]; pose: { x: number; z: number; seat: number | null; face: [number, number] }; dur: number; label: string };
@@ -27,7 +36,27 @@ const SPOTS: Record<Activity, Spot> = {
   flowers: { route: [[4.8, 6.45]], pose: { x: 4.62, z: 6.38, seat: null, face: [-1, 0] }, dur: 6, label: "💐 꽃에 물 주는 중" },
   tv: { route: [[3.3, 6.25], [3.15, 6.95], [2.7, 7.9]], pose: { x: 2.15, z: 8.0, seat: 0.56, face: [-0.5, 0.85] }, dur: 12, label: "📺 이동식 TV 보는 중" },
 };
-const ROUTINE: Activity[] = ["sofa", "cook", "desk", "flowers", "tv"];
+const ACTIVITIES: Activity[] = ["sofa", "cook", "desk", "flowers", "tv"];
+// 방금 한 것만 빼고 랜덤
+const pickNext = (cur: Activity | null) => {
+  const pool = ACTIVITIES.filter((a) => a !== cur);
+  return pool[Math.floor(Math.random() * pool.length)];
+};
+const FIRST = pickNext(null);
+
+// 팡 터지는 별·하트 (방향·색은 한 번만 정함)
+const BURST = Array.from({ length: 16 }, (_, i) => {
+  const a = (i / 16) * Math.PI * 2 + Math.random() * 0.3;
+  const sp = 0.5 + Math.random() * 0.5;
+  return {
+    vx: Math.cos(a) * sp,
+    vz: Math.sin(a) * sp,
+    vy: 1.6 + Math.random() * 0.9,
+    heart: i % 2 === 0,
+    c: ["#f39ab0", "#f2c94c", "#7fb0e8", "#7cc99a", "#a993e0"][i % 5],
+  };
+});
+const FACE_CAMERA = Math.atan2(-11, 15);
 const SPEED = 0.9;
 // 테스트용: 주소에 ?speed=8 을 붙이면 빨리 감기
 const TIME_SCALE = typeof window !== "undefined" ? Math.min(20, Number(new URLSearchParams(window.location.search).get("speed")) || 1) : 1;
@@ -47,29 +76,34 @@ export function Me() {
   const head = useRef<THREE.Group>(null);
   const steam = useRef<THREE.Group>(null);
   const drops = useRef<THREE.Group>(null);
+  const burst = useRef<THREE.Group>(null);
   const st = useRef({
     x: HUB[0],
     z: HUB[1],
     y: 0,
     rot: 0,
-    idx: 0,
+    cur: FIRST,
     prev: null as Activity | null,
-    path: planPath(null, ROUTINE[0]),
+    path: planPath(null, FIRST),
     acting: false,
     timer: 0,
   });
-  const [label, setLabel] = useState("🚶 걷는 중");
   const [prop, setProp] = useState<Activity | null>(null);
 
   useFrame(({ clock }, rawDt) => {
     const dt = Math.min(rawDt, 0.05) * TIME_SCALE;
     const s = st.current;
     const t = clock.elapsedTime;
-    const cur = ROUTINE[s.idx];
+    const cur = s.cur;
     const spot = SPOTS[cur];
     let walking = false;
+    const cheerT = (performance.now() - ME.cheerAt) / 1000;
+    const cheering = cheerT < CHEER_MS / 1000;
 
-    if (!s.acting) {
+    if (cheering) {
+      // 하던 일 멈추고 화면 쪽을 보며 신남
+      turnTo(s, FACE_CAMERA, dt * 1.5);
+    } else if (!s.acting) {
       const [tx, tz] = s.path[0];
       const dx = tx - s.x;
       const dz = tz - s.z;
@@ -82,7 +116,6 @@ export function Me() {
         if (!s.path.length) {
           s.acting = true;
           s.timer = spot.dur;
-          setLabel(spot.label);
           setProp(cur);
           ME.activity = cur;
           ME.label = spot.label;
@@ -102,9 +135,8 @@ export function Me() {
       if (s.timer <= 0) {
         s.acting = false;
         s.prev = cur;
-        s.idx = (s.idx + 1) % ROUTINE.length;
-        s.path = planPath(cur, ROUTINE[s.idx]);
-        setLabel("🚶 걷는 중");
+        s.cur = pickNext(cur);
+        s.path = planPath(cur, s.cur);
         setProp(null);
         ME.activity = "walk";
         ME.label = "🚶 걷는 중";
@@ -116,7 +148,7 @@ export function Me() {
     ME.room = roomAt(s.x, s.z);
 
     if (!root.current) return;
-    const bob = walking ? Math.abs(Math.sin(t * 9)) * 0.035 : 0;
+    const bob = cheering ? Math.abs(Math.sin(t * 7)) * 0.22 : walking ? Math.abs(Math.sin(t * 9)) * 0.035 : 0;
     root.current.position.set(s.x, s.y + bob, s.z);
     root.current.rotation.y = s.rot;
 
@@ -150,6 +182,24 @@ export function Me() {
     }
     if (armL.current) armL.current.rotation.set(lx, 0, 0.12);
     if (armR.current) armR.current.rotation.set(rx, 0, -0.12 + rz);
+    if (cheering) {
+      // 만세! V자로 흔들기
+      const wave = Math.sin(t * 14) * 0.25;
+      armL.current?.rotation.set(-0.3, 0, -2.45 + wave);
+      armR.current?.rotation.set(-0.3, 0, 2.45 - wave);
+    }
+    if (burst.current) {
+      burst.current.visible = cheering;
+      if (cheering) {
+        const e = Math.max(0, cheerT) % 1.4; // 두 번 팡팡
+        burst.current.children.forEach((c, i) => {
+          const b = BURST[i];
+          c.position.set(b.vx * e, 1.0 + b.vy * e - 2.2 * e * e, b.vz * e);
+          c.rotation.set(e * 4, e * 5, 0);
+          c.scale.setScalar(Math.max(0.01, 1 - Math.max(0, e - 0.9) * 2));
+        });
+      }
+    }
     if (head.current) head.current.rotation.z = s.acting && (cur === "sofa" || cur === "tv") ? Math.sin(t * 1.5) * 0.12 : 0;
 
     // 요리 김 / 물방울
@@ -224,9 +274,22 @@ export function Me() {
           <Ball p={[0.115, -0.07, 0.16]} r={0.032} s={[1, 0.6, 0.4]} c={C.pink} />
           <Star p={[0.13, 0.12, 0.1]} r={0.045} depth={0.015} rot={[0, 0.5, 0.3]} c={C.butter} />
         </group>
-        <Html position={[0, 1.15, 0]} center zIndexRange={[10, 0]} style={{ pointerEvents: "none" }}>
-          <div className="me-bubble">{label}</div>
-        </Html>
+        {/* 신나는 효과: 별·하트 */}
+        <group ref={burst} visible={false}>
+          {BURST.map((b, i) =>
+            b.heart ? (
+              <group key={i}>
+                <Ball p={[-0.04, 0, 0]} r={0.055} c={b.c} emissive={b.c} />
+                <Ball p={[0.04, 0, 0]} r={0.055} c={b.c} emissive={b.c} />
+                <Ball p={[0, -0.05, 0]} r={0.045} c={b.c} emissive={b.c} />
+              </group>
+            ) : (
+              <group key={i}>
+                <Star p={[0, 0, 0]} r={0.1} depth={0.02} c={b.c} emissive={b.c} />
+              </group>
+            ),
+          )}
+        </group>
         {/* 물뿌리개 물방울 (월드가 아닌 캐릭터 기준) */}
         <group ref={drops}>
           {[0, 1, 2, 3].map((i) => (
