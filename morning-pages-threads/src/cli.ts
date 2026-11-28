@@ -3,7 +3,9 @@ import {
   appendHistory,
   nextUnusedNote,
   peekQueue,
+  personaHasRecommendations,
   readHistory,
+  readPersona,
   takeFromQueue,
   type PostKind,
 } from "./history.js";
@@ -54,9 +56,11 @@ async function makePost() {
     );
   }
   const history = readHistory();
-  const topic = kind === "info" ? pickByDay(INFO_TOPICS) : pickByDay(DAILY_THEMES);
+  const persona = kind === "daily" ? readPersona() : "";
+  let topic = kind === "info" ? pickByDay(INFO_TOPICS) : pickByDay(DAILY_THEMES);
+  if (topic === "추천템" && !personaHasRecommendations(persona)) topic = pickByDay(DAILY_THEMES, new Date(), 1);
   const note = kind === "daily" ? nextUnusedNote(history) : undefined;
-  const post = await generatePost({ kind, topic, note, recent: history.slice(-8) });
+  const post = await generatePost({ kind, topic, note, persona, recent: history.slice(-8) });
   return { kind, topic, note, ...post, fromQueue: false };
 }
 

@@ -78,3 +78,27 @@ export function takeFromQueue(kind: PostKind): QueuedPost | undefined {
 export function peekQueue(kind: PostKind): QueuedPost | undefined {
   return readQueue().find((q) => q.kind === kind);
 }
+
+const PERSONA_PATH = path.resolve("data/persona.md");
+
+/** data/persona.md 에서 설명('#')·빈 항목을 뺀 내용. 채운 게 없으면 빈 문자열. */
+export function readPersona(): string {
+  let text: string;
+  try {
+    text = fs.readFileSync(PERSONA_PATH, "utf8");
+  } catch {
+    return "";
+  }
+  const lines = text.split("\n").filter((l) => {
+    const t = l.trim();
+    return t.startsWith("## ") || (t.startsWith("-") && t.replace(/^-\s*/, "") !== "");
+  });
+  // 항목이 하나도 없는 제목은 버림
+  return lines
+    .filter((l, i) => !l.startsWith("## ") || (lines[i + 1] && !lines[i + 1].startsWith("## ")))
+    .join("\n");
+}
+
+export function personaHasRecommendations(persona: string): boolean {
+  return /##\s*추천템[^\n]*\n-/.test(persona);
+}
