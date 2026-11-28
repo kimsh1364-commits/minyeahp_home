@@ -32,12 +32,14 @@ async function call(url: string, params: Record<string, string>, method: "GET" |
   return body;
 }
 
-export async function publishText(text: string, cfg = threadsConfigFromEnv()): Promise<string> {
-  const container = await call(
-    `${BASE}/${cfg.userId}/threads`,
-    { media_type: "TEXT", text, access_token: cfg.accessToken },
-    "POST",
-  );
+export async function publishText(
+  text: string,
+  cfg = threadsConfigFromEnv(),
+  replyToId?: string,
+): Promise<string> {
+  const params: Record<string, string> = { media_type: "TEXT", text, access_token: cfg.accessToken };
+  if (replyToId) params.reply_to_id = replyToId; // 내 글에 답글로 이어 달기
+  const container = await call(`${BASE}/${cfg.userId}/threads`, params, "POST");
   const creationId = String(container.id);
 
   // 문서 권장: 컨테이너 생성 후 잠깐 기다렸다가 발행
@@ -49,6 +51,19 @@ export async function publishText(text: string, cfg = threadsConfigFromEnv()): P
     "POST",
   );
   return String(published.id);
+}
+
+/**
+ * 본글 + 답글 이어 달기 (예: "이것만 따라해!" 본글 → 방법 답글).
+ * 각 답글은 바로 앞 글에 달려서 1/2, 2/2 처럼 이어 보입니다. 반환값은 본글 id.
+ */
+export async function publishChain(parts: string[], cfg = threadsConfigFromEnv()): Promise<string> {
+  const rootId = await publishText(parts[0], cfg);
+  let prevId = rootId;
+  for (const part of parts.slice(1)) {
+    prevId = await publishText(part, cfg, prevId);
+  }
+  return rootId;
 }
 
 /**

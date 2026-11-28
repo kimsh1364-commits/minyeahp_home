@@ -1,6 +1,6 @@
 import { generatePost } from "./generate.js";
 import { appendHistory, nextUnusedNote, readHistory, type PostKind } from "./history.js";
-import { publishText, refreshToken } from "./threads.js";
+import { publishChain, refreshToken } from "./threads.js";
 import { DAILY_THEMES, INFO_TOPICS, pickByDay } from "./topics.js";
 
 // 사용법
@@ -42,20 +42,23 @@ async function main() {
   if (command === "preview") {
     const p = await makePost();
     console.log(`[${p.kind}] ${p.topic}${p.note ? ` / 메모: ${p.note}` : ""}\n각도: ${p.angle}\n`);
-    console.log(p.text);
-    console.log(`\n(${[...p.text].length}자, 발행 안 함)`);
+    p.parts.forEach((part, i) => {
+      console.log(`----- ${i === 0 ? "본글" : `답글 ${i}`} (${[...part].length}자) -----`);
+      console.log(part);
+    });
+    console.log("\n(발행 안 함)");
   } else if (command === "post") {
     const p = await makePost();
-    const threadsId = await publishText(p.text);
+    const threadsId = await publishChain(p.parts);
     appendHistory({
       date: new Date().toISOString(),
       kind: p.kind,
       topic: p.topic,
-      text: p.text,
+      text: p.parts.join("\n---\n"),
       threadsId,
       noteUsed: p.note,
     });
-    console.log(`발행 완료 (id ${threadsId})\n\n${p.text}`);
+    console.log(`발행 완료 (id ${threadsId}, 글 ${p.parts.length}개)\n\n${p.parts.join("\n---\n")}`);
   } else if (command === "refresh-token") {
     const t = await refreshToken();
     console.log(`새 토큰 발급됨, ${Math.round(t.expiresInSec / 86400)}일 유효.`);
