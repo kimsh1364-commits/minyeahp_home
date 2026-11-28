@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit(memory/**)",
+      "Edit(inbox/**)",
+      "Edit(briefs/**)"
+    ],
+    "ask": [
+      "Bash",
+      "WebFetch"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Edit(CLAUDE.md)"
+    ]
+  }
+}
