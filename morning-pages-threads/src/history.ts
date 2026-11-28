@@ -47,3 +47,34 @@ export function nextUnusedNote(history: HistoryEntry[]): string | undefined {
     .map((l) => l.replace(/^[-*]\s*/, "").trim())
     .find((l) => l && !l.startsWith("#") && !used.has(l));
 }
+
+// 미리 써둔 글 대기열. 여기 글이 있으면 Claude API 없이 이 글부터 발행합니다.
+const QUEUE_PATH = path.resolve("data/queue.json");
+
+export interface QueuedPost {
+  kind: PostKind;
+  topic: string;
+  parts: string[];
+}
+
+export function readQueue(): QueuedPost[] {
+  try {
+    return JSON.parse(fs.readFileSync(QUEUE_PATH, "utf8")) as QueuedPost[];
+  } catch {
+    return [];
+  }
+}
+
+/** 해당 종류의 첫 글을 대기열에서 꺼냄 (파일에서도 지움). 없으면 undefined. */
+export function takeFromQueue(kind: PostKind): QueuedPost | undefined {
+  const queue = readQueue();
+  const i = queue.findIndex((q) => q.kind === kind);
+  if (i < 0) return undefined;
+  const [post] = queue.splice(i, 1);
+  fs.writeFileSync(QUEUE_PATH, JSON.stringify(queue, null, 2) + "\n");
+  return post;
+}
+
+export function peekQueue(kind: PostKind): QueuedPost | undefined {
+  return readQueue().find((q) => q.kind === kind);
+}

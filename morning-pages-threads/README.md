@@ -8,6 +8,11 @@ Claude가 모닝페이지 글을 쓰고, Threads 공식 API로 하루 두 번 �
 - 정보성 글은 **본글 + 답글 1~2개**로 이어 올립니다. 본글은 '콕 집어 부르기 → 흔한 오해 깨기 → 진짜 이유 → "이것만 따라해!"' 4단, 답글에 실제 방법을 번호로.
 - 말투·구조 규칙과 예시는 `src/generate.ts`의 `SYSTEM`에서 고치면 됩니다.
 
+## API 없이 쓰는 방법
+
+- **Claude API 없이**: `data/queue.json`에 미리 써둔 글이 있으면 그 글부터 순서대로 발행하고, 다 떨어졌을 때만 Claude로 새로 씁니다. 대기열이 차 있으면 `ANTHROPIC_API_KEY`는 없어도 됩니다.
+- **Threads API도 없이**: `posts-week1.md`의 글을 복사해서 스레드 앱의 예약 게시로 직접 올리면 됩니다.
+
 ## 1. Threads API 준비 (한 번만)
 
 1. [developers.facebook.com](https://developers.facebook.com) → 앱 만들기 → 사용 사례 **"Threads API 액세스"**

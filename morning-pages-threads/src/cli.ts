@@ -1,5 +1,12 @@
 import { generatePost } from "./generate.js";
-import { appendHistory, nextUnusedNote, readHistory, type PostKind } from "./history.js";
+import {
+  appendHistory,
+  nextUnusedNote,
+  peekQueue,
+  readHistory,
+  takeFromQueue,
+  type PostKind,
+} from "./history.js";
 import { publishChain, refreshToken } from "./threads.js";
 import { DAILY_THEMES, INFO_TOPICS, pickByDay } from "./topics.js";
 
@@ -26,16 +33,31 @@ function parseKind(): PostKind {
   return kstHour < 15 ? "info" : "daily";
 }
 
+// 대기열(data/queue.json)에 미리 써둔 글이 있으면 그걸 쓰고, 없을 때만 Claude로 새로 씀.
+// 대기열 글은 발행에 성공한 뒤에만 대기열에서 지움.
 async function makePost() {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error("ANTHROPIC_API_KEY 가 없어요. .env 에 넣거나 GitHub secret 으로 설정하세요.");
-  }
   const kind = parseKind();
+  const queued = peekQueue(kind);
+  if (queued) {
+    return {
+      kind,
+      topic: queued.topic,
+      note: undefined,
+      parts: queued.parts,
+      angle: "대기열에서 꺼냄",
+      fromQueue: true,
+    };
+  }
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error(
+      "대기열(data/queue.json)에 이 종류 글이 없고 ANTHROPIC_API_KEY 도 없어요. 대기열에 글을 채우거나 키를 넣어주세요.",
+    );
+  }
   const history = readHistory();
   const topic = kind === "info" ? pickByDay(INFO_TOPICS) : pickByDay(DAILY_THEMES);
   const note = kind === "daily" ? nextUnusedNote(history) : undefined;
   const post = await generatePost({ kind, topic, note, recent: history.slice(-8) });
-  return { kind, topic, note, ...post };
+  return { kind, topic, note, ...post, fromQueue: false };
 }
 
 async function main() {
@@ -50,6 +72,7 @@ async function main() {
   } else if (command === "post") {
     const p = await makePost();
     const threadsId = await publishChain(p.parts);
+    if (p.fromQueue) takeFromQueue(p.kind);
     appendHistory({
       date: new Date().toISOString(),
       kind: p.kind,
