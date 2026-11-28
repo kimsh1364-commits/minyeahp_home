@@ -5,7 +5,8 @@ import path from "node:path";
 const HISTORY_PATH = path.resolve("data/history.json");
 const NOTES_PATH = path.resolve("data/notes.md");
 
-export type PostKind = "info" | "daily";
+/** info: 모닝페이지 정보성(주 2회) · emotion: 감정 주제 글(나머지 아침) · daily: 일상글(저녁) */
+export type PostKind = "info" | "emotion" | "daily";
 
 export interface HistoryEntry {
   date: string;

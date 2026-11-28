@@ -11,13 +11,20 @@ import {
   type PostKind,
 } from "./history.js";
 import { publishChain, refreshToken } from "./threads.js";
-import { DAILY_THEMES, HOOK_STYLES, INFO_TOPICS, pickByDay } from "./topics.js";
+import {
+  DAILY_THEMES,
+  EMOTION_TOPICS,
+  HOOK_STYLES,
+  INFO_TOPICS,
+  INFO_WEEKDAYS,
+  pickByDay,
+} from "./topics.js";
 
 // 사용법
-//   npm run preview -- [--kind info|daily]   글만 만들어서 보여줌 (발행 안 함)
-//   npm run post    -- [--kind info|daily]   만들어서 스레드에 발행 + data/history.json 기록
+//   npm run preview -- [--kind info|emotion|daily]   글만 만들어서 보여줌 (발행 안 함)
+//   npm run post    -- [--kind info|emotion|daily]   만들어서 스레드에 발행 + data/history.json 기록
 //   npm run refresh-token                    Threads 장기 토큰 갱신
-// --kind 를 안 주면 한국 시간 기준 오후 3시 전엔 정보성, 이후엔 일상글.
+// --kind 를 안 주면 한국 시간 기준: 아침은 화·금 정보성 / 나머지 감정 주제, 오후 3시 이후 일상글.
 
 try {
   process.loadEnvFile(".env");
@@ -30,10 +37,12 @@ const [command, ...rest] = process.argv.slice(2);
 function parseKind(): PostKind {
   const i = rest.indexOf("--kind");
   const v = i >= 0 ? rest[i + 1] : undefined;
-  if (v === "info" || v === "daily") return v;
-  if (v) throw new Error(`--kind 는 info 또는 daily: ${v}`);
-  const kstHour = (new Date().getUTCHours() + 9) % 24;
-  return kstHour < 15 ? "info" : "daily";
+  if (v === "info" || v === "emotion" || v === "daily") return v;
+  if (v) throw new Error(`--kind 는 info / emotion / daily: ${v}`);
+  // 한국 시간 기준: 오후 3시 이후는 일상글, 아침은 화·금만 모닝페이지 정보성이고 나머지는 감정 주제 글
+  const kst = new Date(Date.now() + 9 * 3600_000);
+  if (kst.getUTCHours() >= 15) return "daily";
+  return INFO_WEEKDAYS.includes(kst.getUTCDay()) ? "info" : "emotion";
 }
 
 // 대기열(data/queue.json)에 미리 써둔 글이 있으면 그걸 쓰고, 없을 때만 Claude로 새로 씀.
@@ -59,18 +68,23 @@ async function makePost() {
   }
   const history = readHistory();
   const persona = kind === "daily" ? readPersona() : "";
-  let topic = kind === "info" ? pickByDay(INFO_TOPICS) : pickByDay(DAILY_THEMES);
+  let topic =
+    kind === "info"
+      ? pickByDay(INFO_TOPICS)
+      : kind === "emotion"
+        ? pickByDay(EMOTION_TOPICS)
+        : pickByDay(DAILY_THEMES);
   if (topic === "추천템" && !personaHasRecommendations(persona)) topic = pickByDay(DAILY_THEMES, new Date(), 1);
   const note = kind === "daily" ? nextUnusedNote(history) : undefined;
-  const hook = kind === "info" ? nextHook(history) : undefined;
+  const hook = kind === "daily" ? undefined : nextHook(history);
   const post = await generatePost({ kind, topic, note, persona, hook, recent: history.slice(-8) });
   return { kind, topic, note, hook, ...post, fromQueue: false };
 }
 
-/** 최근 7개 정보성 글에서 안 쓴 첫 마디 형식 중 목록 순서상 다음 것. */
+/** 최근 7개 아침 글(정보성·감정)에서 안 쓴 첫 마디 형식 중 목록 순서상 다음 것. */
 function nextHook(history: HistoryEntry[]): string {
   const used = history
-    .filter((h) => h.kind === "info" && h.hook)
+    .filter((h) => h.kind !== "daily" && h.hook)
     .slice(-7)
     .map((h) => h.hook);
   const fresh = HOOK_STYLES.filter((h) => !used.includes(h));

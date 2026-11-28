@@ -2,13 +2,13 @@ name: 모닝페이지 스레드 자동발행
 
 on:
   schedule:
-    - cron: "5 22 * * *"   # 한국시간 오전 7:05 - 정보성 글
+    - cron: "5 22 * * *"   # 한국시간 오전 7:05 - 화·금은 모닝페이지 정보성, 나머지는 감정 주제 글
     - cron: "35 12 * * *"  # 한국시간 오후 9:35 - 일상글
     - cron: "17 3 1 * *"   # 매월 1일 - Threads 토큰 갱신 (60일 만료 방지)
   workflow_dispatch:
     inputs:
       task:
-        description: "post-info / post-daily / preview / refresh-token"
+        description: "post-morning / post-info / post-emotion / post-daily / preview / refresh-token"
         default: preview
 
 permissions:
@@ -40,7 +40,7 @@ jobs:
         id: task
         run: |
           case "${{ github.event.schedule }}" in
-            "5 22 * * *")  echo "task=post-info" >> "$GITHUB_OUTPUT" ;;
+            "5 22 * * *")  echo "task=post-morning" >> "$GITHUB_OUTPUT" ;;
             "35 12 * * *") echo "task=post-daily" >> "$GITHUB_OUTPUT" ;;
             "17 3 1 * *")  echo "task=refresh-token" >> "$GITHUB_OUTPUT" ;;
             *)             echo "task=${{ inputs.task }}" >> "$GITHUB_OUTPUT" ;;
@@ -52,7 +52,13 @@ jobs:
 
       - name: 발행
         if: startsWith(steps.task.outputs.task, 'post-')
-        run: npm run post -- --kind ${{ steps.task.outputs.task == 'post-info' && 'info' || 'daily' }}
+        run: |
+          case "${{ steps.task.outputs.task }}" in
+            post-morning) npm run post ;;   # 요일 보고 info / emotion 자동 선택
+            post-info)    npm run post -- --kind info ;;
+            post-emotion) npm run post -- --kind emotion ;;
+            post-daily)   npm run post -- --kind daily ;;
+          esac
 
       - name: 발행 기록 커밋
         if: startsWith(steps.task.outputs.task, 'post-')
