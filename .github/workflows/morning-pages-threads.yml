@@ -1,0 +1,77 @@
+name: 모닝페이지 스레드 자동발행
+
+on:
+  schedule:
+    - cron: "5 22 * * *"   # 한국시간 오전 7:05 - 정보성 글
+    - cron: "35 12 * * *"  # 한국시간 오후 9:35 - 일상글
+    - cron: "17 3 1 * *"   # 매월 1일 - Threads 토큰 갱신 (60일 만료 방지)
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "post-info / post-daily / preview / refresh-token"
+        default: preview
+
+permissions:
+  contents: write  # data/history.json 기록을 커밋하기 위해
+
+concurrency: morning-pages-threads
+
+defaults:
+  run:
+    working-directory: morning-pages-threads
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+      THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: morning-pages-threads/package-lock.json
+      - run: npm ci
+
+      - name: 작업 결정
+        id: task
+        run: |
+          case "${{ github.event.schedule }}" in
+            "5 22 * * *")  echo "task=post-info" >> "$GITHUB_OUTPUT" ;;
+            "35 12 * * *") echo "task=post-daily" >> "$GITHUB_OUTPUT" ;;
+            "17 3 1 * *")  echo "task=refresh-token" >> "$GITHUB_OUTPUT" ;;
+            *)             echo "task=${{ inputs.task }}" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: 미리보기
+        if: steps.task.outputs.task == 'preview'
+        run: npm run preview
+
+      - name: 발행
+        if: startsWith(steps.task.outputs.task, 'post-')
+        run: npm run post -- --kind ${{ steps.task.outputs.task == 'post-info' && 'info' || 'daily' }}
+
+      - name: 발행 기록 커밋
+        if: startsWith(steps.task.outputs.task, 'post-')
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/history.json
+          git commit -m "chore: 스레드 발행 기록" || exit 0
+          git push
+
+      - name: 토큰 갱신
+        id: refresh
+        if: steps.task.outputs.task == 'refresh-token'
+        run: npm run refresh-token
+
+      # 기본 GITHUB_TOKEN 은 secret 을 못 바꿔서, secrets 쓰기 권한이 있는 토큰(SECRETS_PAT)이 필요
+      - name: 새 토큰을 secret 에 저장
+        if: steps.task.outputs.task == 'refresh-token' && env.SECRETS_PAT != ''
+        env:
+          SECRETS_PAT: ${{ secrets.SECRETS_PAT }}
+          GH_TOKEN: ${{ secrets.SECRETS_PAT }}
+        run: gh secret set THREADS_ACCESS_TOKEN --repo "${{ github.repository }}" --body "${{ steps.refresh.outputs.token }}"

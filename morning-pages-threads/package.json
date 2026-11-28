@@ -1,0 +1,21 @@
+{
+  "name": "morning-pages-threads",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preview": "tsx src/cli.ts preview",
+    "post": "tsx src/cli.ts post",
+    "refresh-token": "tsx src/cli.ts refresh-token",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.14.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.11",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
