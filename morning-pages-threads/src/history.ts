@@ -11,6 +11,7 @@ export interface HistoryEntry {
   date: string;
   kind: PostKind;
   topic: string;
+  hook?: string;
   text: string;
   threadsId?: string;
   noteUsed?: string;
@@ -54,6 +55,7 @@ const QUEUE_PATH = path.resolve("data/queue.json");
 export interface QueuedPost {
   kind: PostKind;
   topic: string;
+  hook?: string;
   parts: string[];
 }
 

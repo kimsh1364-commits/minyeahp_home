@@ -7,10 +7,11 @@ import {
   readHistory,
   readPersona,
   takeFromQueue,
+  type HistoryEntry,
   type PostKind,
 } from "./history.js";
 import { publishChain, refreshToken } from "./threads.js";
-import { DAILY_THEMES, INFO_TOPICS, pickByDay } from "./topics.js";
+import { DAILY_THEMES, HOOK_STYLES, INFO_TOPICS, pickByDay } from "./topics.js";
 
 // 사용법
 //   npm run preview -- [--kind info|daily]   글만 만들어서 보여줌 (발행 안 함)
@@ -44,6 +45,7 @@ async function makePost() {
     return {
       kind,
       topic: queued.topic,
+      hook: queued.hook,
       note: undefined,
       parts: queued.parts,
       angle: "대기열에서 꺼냄",
@@ -60,8 +62,19 @@ async function makePost() {
   let topic = kind === "info" ? pickByDay(INFO_TOPICS) : pickByDay(DAILY_THEMES);
   if (topic === "추천템" && !personaHasRecommendations(persona)) topic = pickByDay(DAILY_THEMES, new Date(), 1);
   const note = kind === "daily" ? nextUnusedNote(history) : undefined;
-  const post = await generatePost({ kind, topic, note, persona, recent: history.slice(-8) });
-  return { kind, topic, note, ...post, fromQueue: false };
+  const hook = kind === "info" ? nextHook(history) : undefined;
+  const post = await generatePost({ kind, topic, note, persona, hook, recent: history.slice(-8) });
+  return { kind, topic, note, hook, ...post, fromQueue: false };
+}
+
+/** 최근 7개 정보성 글에서 안 쓴 첫 마디 형식 중 목록 순서상 다음 것. */
+function nextHook(history: HistoryEntry[]): string {
+  const used = history
+    .filter((h) => h.kind === "info" && h.hook)
+    .slice(-7)
+    .map((h) => h.hook);
+  const fresh = HOOK_STYLES.filter((h) => !used.includes(h));
+  return fresh[0] ?? pickByDay(HOOK_STYLES);
 }
 
 async function main() {
@@ -81,6 +94,7 @@ async function main() {
       date: new Date().toISOString(),
       kind: p.kind,
       topic: p.topic,
+      hook: p.hook,
       text: p.parts.join("\n---\n"),
       threadsId,
       noteUsed: p.note,
