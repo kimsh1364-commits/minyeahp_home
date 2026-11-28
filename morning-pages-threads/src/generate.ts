@@ -27,30 +27,34 @@ const SYSTEM = `너는 '모닝페이지' 습관을 알리는 스레드(Threads) 
    독자가 "어 난데?" 하고 멈추게. 막연한 "요즘 힘드신 분" 금지, 장면이 보이게 구체적으로.
 2. 흔한 오해 깨기: 다들 하는 방식이 왜 효과가 없는지 단호하게. (예: "일기처럼 예쁘게 쓰려고 하면 3일도 못 간다")
 3. 진짜 이유: 왜 그런지 원리를 1~2문장으로 쉽게.
-4. 예고: "이것만 따라해" 식으로 방법은 답글에 있다고 넘긴다. 본글에서 방법을 다 말하지 않는다.
-답글: 실제 방법을 번호 매겨 3~5단계로. 바로 따라 할 수 있게 구체적으로 (시간, 분량, 첫 문장 예시 등).
-마지막 답글 끝에 한 줄로 가벼운 질문 (예: "다들 몇 번째 작심삼일이야?").
+4. 예고: 방법의 개수를 꼭 숫자로 밝힌다. "딱 3가지만 따라 해봐!" 처럼. ("이것만", "이대로" 처럼 숫자 없는 예고 금지)
+   본글에서 방법을 다 말하지 않는다.
+답글: 예고에서 말한 개수와 정확히 같은 수의 방법을 "1. 2. 3." 번호로. 기본은 3가지.
+- 바로 따라 할 수 있게 구체적으로 (시간, 분량, 기간 등. 예: "4주 동안은 다시 읽지 말고 덮기").
+- 덧붙일 팁은 번호를 늘리지 말고 해당 번호 바로 아래 "(📌 ...)" 한 줄로.
+- 번호 목록 뒤 빈 줄, 그다음 한 줄 정리(선택) + 가벼운 질문 한 줄로 끝낸다.
 
-# 정보성 예시 (형식만 참고, 문장은 베끼지 말 것)
+# 정보성 예시 (계정 주인이 직접 다듬은 실제 글. 형식은 이대로, 문장은 베끼지 말 것)
 본글:
 아침마다 머리가 멍하고
 할 일은 많은데 손에 안 잡히고
-자기 전에 걱정 때문에 뒤척이는 사람들은 명심해.
+자기 전엔 걱정 때문에 뒤척이는 사람들은 명심해.
 
 플래너에 할 일만 빼곡히 적어봤자
 머릿속 소음은 그대로야.
 
 생각이 정리가 안 되는 건 의지가 약해서가 아니라
 머릿속에 쌓인 말이 나갈 데가 없어서야.
-종이로 먼저 다 쏟아내야 비로소 자리가 생겨.
+종이에 먼저 다 쏟아내야 비로소 자리가 생겨.
 
-딱 3주만 이대로 해봐!
+딱 3가지만 따라 해봐!
 답글:
 1. 눈 뜨자마자 폰 보기 전에 노트부터 펴기
-2. A4 3쪽, 생각나는 대로 손으로 (안 되면 1쪽부터)
-3. 쓸 말 없으면 "쓸 말이 없다"를 그대로 쓰기
-4. 다 쓰면 다시 읽지 말고 덮기
+2. 손으로, 생각나는 대로 3쪽 (부담되면 1쪽부터)
+(📌문장이 이상해도, 같은 말 반복해도 그냥 계속 쓰기)
+3. 다 쓰면 4주 동안은 다시 읽지 말고 덮기
 
+이게 『아티스트 웨이』에 나오는 '모닝페이지'야.
 다들 아침에 제일 먼저 하는 게 뭐야?
 
 # 일상글 구조 (본글 하나, 답글 없음)
@@ -93,6 +97,7 @@ export async function generatePost(
 # 최근에 올린 글 (같은 표현·같은 질문·같은 증상 나열 반복 금지, 다른 각도로)
 ${recentText}`;
 
+  let problem = "";
   for (let attempt = 1; attempt <= 2; attempt++) {
     const response = await client.beta.messages.parse({
       model: "claude-opus-5-5",
@@ -107,7 +112,7 @@ ${recentText}`;
           content:
             attempt === 1
               ? user
-              : `${user}\n\n(직전 결과에서 ${THREADS_MAX_CHARS}자 넘는 글이 있었어. 각 글을 더 짧게.)`,
+              : `${user}\n\n(직전 결과가 규칙에 안 맞았어: ${problem}. 고쳐서 다시 써줘.)`,
         },
       ],
     });
@@ -122,9 +127,28 @@ ${recentText}`;
     if (input.kind === "daily") parts = parts.slice(0, 1);
     if (input.kind === "info") parts = parts.slice(0, 3);
     if (parts.length === 0) throw new Error("빈 글이 생성됐어요.");
-    if (parts.every((p) => [...p].length <= THREADS_MAX_CHARS)) return { parts, angle: post.angle };
+    problem = findProblem(input.kind, parts);
+    if (!problem) return { parts, angle: post.angle };
   }
-  throw new Error(`두 번 시도했지만 ${THREADS_MAX_CHARS}자를 넘는 글이 있었어요.`);
+  throw new Error(`두 번 시도했지만 규칙에 안 맞았어요: ${problem}`);
+}
+
+/** 규칙 위반을 찾아 설명을 돌려줌. 문제 없으면 빈 문자열. */
+export function findProblem(kind: PostKind, parts: string[]): string {
+  if (parts.some((p) => [...p].length > THREADS_MAX_CHARS)) return `${THREADS_MAX_CHARS}자 넘는 글이 있음`;
+  if (kind !== "info") return "";
+  if (parts.length < 2) return "방법을 담은 답글이 없음";
+  const steps = parts
+    .slice(1)
+    .join("\n")
+    .split("\n")
+    .filter((l) => /^\d+\.\s/.test(l.trim())).length;
+  if (steps === 0) return "답글 방법에 1. 2. 3. 번호가 없음";
+  const teaser = parts[0].trim().split("\n").pop() ?? "";
+  const korean = ["", "한", "두", "세", "네", "다섯"][steps] ?? "";
+  if (!teaser.includes(`${steps}가지`) && !(korean && teaser.includes(`${korean} 가지`)))
+    return `본글 마지막 줄에 방법 개수(${steps}가지)가 숫자로 없음: "${teaser}"`;
+  return "";
 }
 
 function indent(s: string) {
